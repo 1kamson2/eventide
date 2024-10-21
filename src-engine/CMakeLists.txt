@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.15)
+project(glfw-tutorial)
+
+find_package(glfw3 3.3 REQUIRED)
+#add_subdirectory(~/usr/include/GLFW/ SYSTEM)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp" "${CMAKE_SOURCE_DIR}/src/*.c")
+add_definitions(-DSOME_DEFINITION)
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_link_libraries(${CMAKE_PROJECT_NAME} glfw)
