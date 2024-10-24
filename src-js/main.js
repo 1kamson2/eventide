@@ -1,18 +1,27 @@
-const { invoke } = window.__TAURI__.core;
+class MenuEventHandler {
+  name;
+  startButton;
+  newGameButton;
+  quitButton;
+  constructor() {
+    this.name = "Main Menu";
+    this.startButton = document.querySelector(".start-button");
+    this.newGameButton = document.querySelector(".newgame-button");
+    this.quitButton = document.querySelector(".exit-button");
 
-let greetInputEl;
-let greetMsgEl;
+    this.startButton.addEventListener("click", this.startGame);
+    this.newGameButton.addEventListener("click", this.newGame);
+    this.quitButton.addEventListener("click", this.quitGame);
+  }
 
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsgEl.textContent = await invoke("greet", { name: greetInputEl.value });
+  startGame() {
+    console.log("Here call Rust function to initialize game.");
+  }
+  newGame() {
+    console.log("Here call Rust function to initialize new game.");
+  }
+  quitGame() {
+    console.log("Here call Rust function to quit game.");
+  }
 }
-
-window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    greet();
-  });
-});
+const menu = new MenuEventHandler();
