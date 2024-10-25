@@ -22,25 +22,25 @@ int main() {
     // render
     // ------
     // engine.Render();
-
+    ii treesDist = engine.renderTrees();
+    ii tilesDist = engine.renderTiles();
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing();
     BeginMode2D(engine.camera);
     ClearBackground(BLUE);
-    ii render = engine.renderDistance();
-    for (int i = render.first; i < render.second; i++) {
-      DrawRectangleRec(engine.wseed->trees[i], engine.wseed->treeColors[i]);
+
+    for (int idx = treesDist.first; idx < treesDist.second; ++idx) {
+      DrawRectangleRec(engine.wseed->trees[idx], engine.wseed->treeColors[idx]);
     }
-    for (int i = 0; i < CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LEN; ++i) {
-      DrawRectangleRec(engine.tiles[i], BLACK);
+
+    for (int idx = tilesDist.first; idx < tilesDist.second; ++idx) {
+      DrawRectangleRec(engine.tiles[idx].tile, engine.tiles[idx].col);
     }
-    // DrawRectangle(-6000, 320, 13000, 8000, GREEN);
     DrawRectangleRec(engine.player->hitbox, RED);
     EndMode2D();
     EndDrawing();
     //----------------------------------------------------------------------------------
-    // Simple debug:
     std::cout << "FPS: " << GetFPS() << std::endl;
     std::cout << "X: " << engine.player->hitbox.x << std::endl;
     std::cout << "Y: " << engine.player->hitbox.y << std::endl;

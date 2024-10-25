@@ -22,22 +22,33 @@ void EventideEngine::eventideInit(unsigned int seed) {
     for (unsigned int y = 0; y < CHUNK_HEIGHT; ++y) {
       for (unsigned int x = 0; x < CHUNK_WIDTH; ++x) {
         unsigned int idx = chunk * STRIDE + y * CHUNK_WIDTH + x;
+        this->tiles[idx].tile.x =
+            (float)(-6000.0f + chunk * CHUNK_WIDTH + x) * TILE_SZ;
 
-        this->tiles[idx] = (Rectangle){
-            (float)(x + chunk * CHUNK_WIDTH) * TILE_SZ,
-            height - 6 * TILE_SZ + (float)y * TILE_SZ, TILE_SZ, TILE_SZ};
+        this->tiles[idx].tile.y = (float)y * TILE_SZ;
+        if (this->tiles[idx].tile.y > 0 && this->tiles[idx].tile.y < 60) {
+          int whatType = GetRandomValue(1, 100);
+          if (whatType >= 1 && whatType <= 66) {
+            // Later add the enum maybe?
+            this->tiles[idx].col = (Color){GREEN};
+          } else {
+            this->tiles[idx].col = (Color){BROWN};
+          }
+        } else {
+          this->tiles[idx].col = (Color){BLACK};
+        }
       }
     }
   }
   int idx = 0;
   while (idx < 1000) {
     // real position is -6000 + idx * TILE_SZ
+    // add checking terrain height on given index, then create trees.
     idx += GetRandomValue(0, TILE_SZ);
 
     wseed->trees[idx].width = (float)GetRandomValue(TILE_SZ, 2 * TILE_SZ);
-    wseed->trees[idx].height = (float)GetRandomValue(5 * TILE_SZ, 10 * TILE_SZ);
-    wseed->trees[idx].y = height + 2 * TILE_SZ -
-                          wseed->trees[idx].height;  // <-- -2 if doesnt work
+    wseed->trees[idx].height = (float)GetRandomValue(5 * TILE_SZ, 15 * TILE_SZ);
+    wseed->trees[idx].y = 2 * TILE_SZ + wseed->trees[idx].height;
     wseed->trees[idx].x = -6000.0f + idx * TILE_SZ;
     wseed->treeColors[idx] =
         (Color){(unsigned char)GetRandomValue(100, 200),
@@ -63,14 +74,28 @@ void EventideEngine::processInput(float dt) {
 void EventideEngine::update(float dt) {
   camera.target = (Vector2){player->hitbox.x + 20, player->hitbox.y + 20};
 }
-
-ii EventideEngine::renderDistance() {
+int EventideEngine::getPlayerIndex() const {
+  return floor((player->hitbox.x + 6000) / TILE_SZ);
+}
+ii EventideEngine::renderTrees() const {
   // cap to i > 0 and i < 1000, -6000 is start of the world, 1000 because a 1000
   // trees
+  int currIdx = this->getPlayerIndex();
+  return ii(std::max((int)(currIdx - RENDER_DISTANCE / 2), 0),
+            std::min(1000, (int)(currIdx + RENDER_DISTANCE / 2)));
+}
 
-  int currIdx = floor((player->hitbox.x + 6000) / TILE_SZ);
-  return ii(std::max((int)(currIdx - RENDER_DISTANCE), 0),
-            std::min(1000, (int)(currIdx + RENDER_DISTANCE)));
+ii EventideEngine::renderTiles() const {
+  int currIdx = this->getPlayerIndex();
+
+  int chunkStart = currIdx - (currIdx % STRIDE);
+  int chunkEnd = chunkStart + STRIDE;  // End rendering after the player
+
+  // Clamp the indices to valid ranges
+  chunkStart = std::max(0, chunkStart);
+  chunkEnd = std::min(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LEN, chunkEnd);
+
+  return ii(chunkStart, chunkEnd);
 }
 
 EventideEngine::~EventideEngine() {
