@@ -34,9 +34,9 @@ int main() {
       DrawRectangleRec(engine.wseed->trees[idx], engine.wseed->treeColors[idx]);
     }
 
-    for (int idx = tilesDist.first; idx < tilesDist.second; ++idx) {
-      DrawRectangleRec(engine.tiles[idx].tile, engine.tiles[idx].col);
-    }
+    // for (int idx = tilesDist.first; idx < tilesDist.second; ++idx) {
+    // DrawRectangleRec(engine.tiles_buf[idx].tile, engine.tiles_buf[idx].col);
+    //}
     DrawRectangleRec(engine.player->hitbox, RED);
     EndMode2D();
     EndDrawing();

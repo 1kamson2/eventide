@@ -16,27 +16,30 @@ EventideEngine::EventideEngine(unsigned int width, unsigned int height,
 }
 
 void EventideEngine::eventideInit(unsigned int seed) {
+  std::ofstream world_conf{"world-conf.txt"};
+  if (!world_conf) {
+    std::cerr << "Uh oh, Sample.txt could not be opened for writing!\n";
+    exit(-1);
+  }
   SetRandomSeed(seed);
-  for (unsigned int chunk = 0; chunk < CHUNK_LEN; ++chunk) {
-    std::cout << "Generating chunk: " << chunk << std::endl;
-    for (unsigned int y = 0; y < CHUNK_HEIGHT; ++y) {
-      for (unsigned int x = 0; x < CHUNK_WIDTH; ++x) {
-        unsigned int idx = chunk * STRIDE + y * CHUNK_WIDTH + x;
-        this->tiles[idx].tile.x =
-            (float)(-6000.0f + chunk * CHUNK_WIDTH + x) * TILE_SZ;
-
-        this->tiles[idx].tile.y = (float)y * TILE_SZ;
-        if (this->tiles[idx].tile.y > 0 && this->tiles[idx].tile.y < 60) {
-          int whatType = GetRandomValue(1, 100);
-          if (whatType >= 1 && whatType <= 66) {
-            // Later add the enum maybe?
-            this->tiles[idx].col = (Color){GREEN};
-          } else {
-            this->tiles[idx].col = (Color){BROWN};
+  for (unsigned int chunkX = 0; chunkX < SMALL_WORLD_WIDTH; ++chunkX) {
+    for (unsigned int chunkY = 0; chunkY < SMALL_WORLD_DEPTH; ++chunkY) {
+      std::cout << "Currently generating chunk: #" << chunkX << ", " << chunkY
+                << std::endl;
+      for (unsigned int y = 0; y < CHUNK_SZ; ++y) {
+        for (unsigned int x = 0; x < CHUNK_SZ; ++x) {
+          // this is function to access it later.
+          int currentdepth = x + y * CHUNK_SZ + chunkY * CHUNK_SZ * CHUNK_SZ +
+                             SMALL_WORLD_STRIDE * chunkX;
+          if (currentdepth > 0 && currentdepth < 60) {
+            world_conf << GRASS;
+          } else if (currentdepth > 60 && currentdepth < 120) {
+            world_conf << DIRT;
+          } else if (currentdepth > 120) {
+            world_conf << STONE;
           }
-        } else {
-          this->tiles[idx].col = (Color){BLACK};
         }
+        world_conf << '\n';
       }
     }
   }
@@ -49,7 +52,7 @@ void EventideEngine::eventideInit(unsigned int seed) {
     wseed->trees[idx].width = (float)GetRandomValue(TILE_SZ, 2 * TILE_SZ);
     wseed->trees[idx].height = (float)GetRandomValue(5 * TILE_SZ, 15 * TILE_SZ);
     wseed->trees[idx].y = 2 * TILE_SZ + wseed->trees[idx].height;
-    wseed->trees[idx].x = -6000.0f + idx * TILE_SZ;
+    wseed->trees[idx].x = SMALL_WORLD_START + idx * TILE_SZ;
     wseed->treeColors[idx] =
         (Color){(unsigned char)GetRandomValue(100, 200),
                 (unsigned char)GetRandomValue(100, 200),
@@ -75,7 +78,7 @@ void EventideEngine::update(float dt) {
   camera.target = (Vector2){player->hitbox.x + 20, player->hitbox.y + 20};
 }
 int EventideEngine::getPlayerIndex() const {
-  return floor((player->hitbox.x + 6000) / TILE_SZ);
+  return floor((player->hitbox.x - SMALL_WORLD_START) / TILE_SZ);
 }
 ii EventideEngine::renderTrees() const {
   // cap to i > 0 and i < 1000, -6000 is start of the world, 1000 because a 1000
@@ -84,16 +87,19 @@ ii EventideEngine::renderTrees() const {
   return ii(std::max((int)(currIdx - RENDER_DISTANCE / 2), 0),
             std::min(1000, (int)(currIdx + RENDER_DISTANCE / 2)));
 }
-
+// those functions are wrong
 ii EventideEngine::renderTiles() const {
   int currIdx = this->getPlayerIndex();
 
-  int chunkStart = currIdx - (currIdx % STRIDE);
-  int chunkEnd = chunkStart + STRIDE;  // End rendering after the player
+  int chunkStart = currIdx - (currIdx % SMALL_WORLD_STRIDE);
+  int chunkEnd =
+      chunkStart + SMALL_WORLD_STRIDE;  // End rendering after the player
 
   // Clamp the indices to valid ranges
   chunkStart = std::max(0, chunkStart);
-  chunkEnd = std::min(CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LEN, chunkEnd);
+  chunkEnd =
+      std::min(SMALL_WORLD_END,
+               chunkEnd);  // <-- i guess? meant to be the last index of buffer
 
   return ii(chunkStart, chunkEnd);
 }

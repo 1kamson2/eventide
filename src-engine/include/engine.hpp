@@ -1,16 +1,24 @@
 #pragma once
 #include <cmath>
+#include <fstream>
 #include <iostream>
 
 #include "raylib.h"
-#define CHUNK_LEN 100
-#define CHUNK_HEIGHT 16
-#define CHUNK_WIDTH 16
-#define STRIDE 255
+using ii = std::pair<int, int>;
+#define CHUNK_SZ 16
+#define SMALL_WORLD_STRIDE 1536
 #define TILE_SZ 16
 #define RENDER_DISTANCE 32
 
-using ii = std::pair<int, int>;
+#define SMALL_WORLD_START -2048
+#define SMALL_WORLD_END 2048
+#define SMALL_WORLD_WIDTH 256
+#define SMALL_WORLD_DEPTH 12  // in chunks
+#define AIR 0
+#define GRASS 1
+#define DIRT 2
+#define STONE 3
+
 enum class GameState { GAME_ACTIVE = 1, GAME_MENU = 0, GAME_WIN = 2 };
 struct PlayerObject {
   Rectangle hitbox{0, -40, 40, 40};
@@ -33,7 +41,7 @@ class EventideEngine {
   PlayerObject* player;
   WorldSeed* wseed;
   unsigned int width, height, fps;
-  Tile tiles[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LEN];
+  Tile tiles_buf[RENDER_DISTANCE * 4];
   EventideEngine(unsigned int width, unsigned int height, unsigned int fps);
   virtual ~EventideEngine();
 
