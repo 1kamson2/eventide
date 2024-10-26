@@ -23,7 +23,6 @@ int main() {
     // ------
     // engine.Render();
     ii treesDist = engine.renderTrees();
-    ii tilesDist = engine.renderTiles();
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing();
@@ -34,9 +33,12 @@ int main() {
       DrawRectangleRec(engine.wseed->trees[idx], engine.wseed->treeColors[idx]);
     }
 
-    // for (int idx = tilesDist.first; idx < tilesDist.second; ++idx) {
-    // DrawRectangleRec(engine.tiles_buf[idx].tile, engine.tiles_buf[idx].col);
-    //}
+    for (int y = 0; y < 3 * RENDER_DISTANCE; ++y) {
+      for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
+        DrawRectangleRec(engine.tiles_buf[y][x].tile,
+                         engine.tiles_buf[y][x].col);
+      }
+    }
     DrawRectangleRec(engine.player->hitbox, RED);
     EndMode2D();
     EndDrawing();

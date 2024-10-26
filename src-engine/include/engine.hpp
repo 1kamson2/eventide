@@ -5,15 +5,17 @@
 
 #include "raylib.h"
 using ii = std::pair<int, int>;
+using pis = std::pair<int, std::string>;
 #define CHUNK_SZ 16
-#define SMALL_WORLD_STRIDE 1536
+#define SMALL_WORLD_STRIDE 4096
 #define TILE_SZ 16
 #define RENDER_DISTANCE 32
 
 #define SMALL_WORLD_START -2048
 #define SMALL_WORLD_END 2048
-#define SMALL_WORLD_WIDTH 256
-#define SMALL_WORLD_DEPTH 12  // in chunks
+#define SMALL_WORLD_DEPTH 96
+#define SMALL_WORLD_WIDTH 256  // <-- ignore
+// #define SMALL_WORLD_DEPTH 12   // <-- ignore
 #define AIR 0
 #define GRASS 1
 #define DIRT 2
@@ -21,7 +23,7 @@ using ii = std::pair<int, int>;
 
 enum class GameState { GAME_ACTIVE = 1, GAME_MENU = 0, GAME_WIN = 2 };
 struct PlayerObject {
-  Rectangle hitbox{0, -40, 40, 40};
+  Rectangle hitbox{SMALL_WORLD_START + 3 * TILE_SZ, -80, 40, 40};
 };
 
 struct WorldSeed {
@@ -41,13 +43,13 @@ class EventideEngine {
   PlayerObject* player;
   WorldSeed* wseed;
   unsigned int width, height, fps;
-  Tile tiles_buf[RENDER_DISTANCE * 4];
+  Tile tiles_buf[3 * RENDER_DISTANCE][3 * RENDER_DISTANCE];
   EventideEngine(unsigned int width, unsigned int height, unsigned int fps);
   virtual ~EventideEngine();
 
-  int getPlayerIndex() const;
+  ii getPlayerIndex() const;
   ii renderTrees() const;
-  ii renderTiles() const;
+  void renderTiles();
 
   void eventideInit(unsigned int seed);
   void processInput(float dt);
