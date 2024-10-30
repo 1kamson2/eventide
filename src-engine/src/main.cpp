@@ -12,7 +12,6 @@ int main() {
   float delta{0};
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
-    engine.processInput(delta);
 
     // update game state
     // -----------------
@@ -35,17 +34,19 @@ int main() {
 
     for (int y = 0; y < 3 * RENDER_DISTANCE; ++y) {
       for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
-        DrawRectangleRec(engine.tiles_buf[y][x].tile,
-                         engine.tiles_buf[y][x].col);
+        DrawRectangleRec(engine.tiles_buf[y][x].rect,
+                         engine.tiles_buf[y][x].color);
       }
     }
-    DrawRectangleRec(engine.player->hitbox, RED);
+    DrawRectangleRec(engine.player->hitbox.rect, engine.player->hitbox.color);
     EndMode2D();
     EndDrawing();
     //----------------------------------------------------------------------------------
     std::cout << "FPS: " << GetFPS() << std::endl;
-    std::cout << "X: " << engine.player->hitbox.x << std::endl;
-    std::cout << "Y: " << engine.player->hitbox.y << std::endl;
+    std::cout << "X: " << engine.player->pos.x << std::endl;
+    std::cout << "Y: " << engine.player->pos.y << std::endl;
+    std::cout << "MOUSE POS: " << GetMouseX() << " " << GetMouseY()
+              << std::endl;
   }
 
   // De-Initialization
