@@ -10,7 +10,6 @@ EventideEngine::EventideEngine(unsigned int width, unsigned int height,
       height{height},
       fps{fps},
       player{new Player},
-      wseed{new WorldSeed},
       State{GameState::GAME_ACTIVE} {
   player->pos = (Vector2){SMALL_WORLD_START + 100, -200};
   player->speed = 0;
@@ -37,32 +36,32 @@ void EventideEngine::eventideInit(unsigned int seed) {
     for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
       if (depth == 0) {
         // GRASS ENUM
-        this->tiles_buf[y][x].rect =
+        this->tiles_buff[y][x].rect =
             (Rectangle){(float)SMALL_WORLD_START + x * TILE_SZ, (float)depth,
                         TILE_SZ, TILE_SZ};
-        this->tiles_buf[y][x].color = (Color){GREEN};
-        this->tiles_buf[y][x].type = ItemType::GRASS;
-        this->tiles_buf[y][x].blocking = CanBlock::YES;
+        this->tiles_buff[y][x].color = (Color){GREEN};
+        this->tiles_buff[y][x].type = ItemType::GRASS;
+        this->tiles_buff[y][x].blocking = CanBlock::YES;
       } else if (depth > 0 && depth <= 60) {
         // DIRT ENUM
-        this->tiles_buf[y][x].rect =
+        this->tiles_buff[y][x].rect =
             (Rectangle){(float)SMALL_WORLD_START + x * TILE_SZ, (float)depth,
                         TILE_SZ, TILE_SZ};
-        this->tiles_buf[y][x].color = (Color){BROWN};
-        this->tiles_buf[y][x].type = ItemType::DIRT;
-        this->tiles_buf[y][x].blocking = CanBlock::YES;
+        this->tiles_buff[y][x].color = (Color){BROWN};
+        this->tiles_buff[y][x].type = ItemType::DIRT;
+        this->tiles_buff[y][x].blocking = CanBlock::YES;
       } else if (depth > 60) {
         int isStone = GetRandomValue(0, 100);
-        this->tiles_buf[y][x].rect =
+        this->tiles_buff[y][x].rect =
             (Rectangle){(float)SMALL_WORLD_START + x * TILE_SZ, (float)depth,
                         TILE_SZ, TILE_SZ};
-        this->tiles_buf[y][x].blocking = CanBlock::YES;
+        this->tiles_buff[y][x].blocking = CanBlock::YES;
         if (isStone >= 0 && isStone <= 77) {
-          this->tiles_buf[y][x].color = (Color){GRAY};
-          this->tiles_buf[y][x].type = ItemType::STONE;
+          this->tiles_buff[y][x].color = (Color){GRAY};
+          this->tiles_buff[y][x].type = ItemType::STONE;
         } else if (isStone > 77 && isStone <= 100) {
-          this->tiles_buf[y][x].color = (Color){BROWN};
-          this->tiles_buf[y][x].type = ItemType::GRASS;
+          this->tiles_buff[y][x].color = (Color){BROWN};
+          this->tiles_buff[y][x].type = ItemType::GRASS;
         }
       }
     }
@@ -70,12 +69,13 @@ void EventideEngine::eventideInit(unsigned int seed) {
   int pos = 0;
   while (pos < 1000) {
     pos += GetRandomValue(0, TILE_SZ);
-
-    wseed->trees[pos].width = (float)GetRandomValue(TILE_SZ, 2 * TILE_SZ);
-    wseed->trees[pos].height = (float)GetRandomValue(5 * TILE_SZ, 15 * TILE_SZ);
-    wseed->trees[pos].y = -100.0f + (float)GetRandomValue(TILE_SZ, 2 * TILE_SZ);
-    wseed->trees[pos].x = SMALL_WORLD_START + pos * TILE_SZ;
-    wseed->treeColors[pos] =
+    tree_buff[pos].rect.width = (float)GetRandomValue(TILE_SZ, 2 * TILE_SZ);
+    tree_buff[pos].rect.height =
+        (float)GetRandomValue(5 * TILE_SZ, 15 * TILE_SZ);
+    tree_buff[pos].rect.y =
+        -100.0f + (float)GetRandomValue(TILE_SZ, 2 * TILE_SZ);
+    tree_buff[pos].rect.x = SMALL_WORLD_START + pos * TILE_SZ;
+    tree_buff[pos].color =
         (Color){(unsigned char)GetRandomValue(100, 200),
                 (unsigned char)GetRandomValue(100, 200),
                 (unsigned char)GetRandomValue(100, 200), 255};
@@ -93,6 +93,13 @@ bool EventideEngine::checkCollision(const EnvTile& tempET) {
   return collisionX && collisionY;
 }
 
+ii EventideEngine::mouseWorldCoords() {
+  // mouse_world_coords = player position + mouse_pos_on_screen + WORLD_OFFSET
+  int mosX = GetMouseX();
+  int mosY = GetMouseY();
+  return ii(this->player->pos.x + mosX - 300, this->player->pos.y + mosY - 285);
+}
+
 void EventideEngine::updatePlayer(float dt) {
   if (IsKeyDown(KEY_RIGHT)) {
     player->pos.x += PLAYER_HORIZONTAL_SPEED * dt;
@@ -104,15 +111,24 @@ void EventideEngine::updatePlayer(float dt) {
     player->pos.y -= PLAYER_VERTICAL_SPEED * dt;
   } else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     // bad cast is probable
-    // too retarded for this
-    if (abs((int)this->player->pos.x - (GetMouseX() - 300)) < 5 * TILE_SZ) {
-      int x = (GetMouseX() - 300) / TILE_SZ;  // offset half weight / height and
-                                              // half the player height / width
-      int y = (GetMouseY() - 325) / TILE_SZ;
-      this->tiles_buf[y][x].type = ItemType::AIR;
-      // associate block with enums (structure? or json?)
-      this->tiles_buf[y][x].color = (Color){WHITE};
-      this->tiles_buf[y][x].blocking = CanBlock::NO;
+    ii mosPos = this->mouseWorldCoords();
+    if (mosPos.first - this->player->pos.x < 5 * TILE_SZ ||
+        mosPos.first - this->player->pos.y > -5 * TILE_SZ) {
+      int arrX = std::max(0, (SMALL_WORLD_END + mosPos.first) / TILE_SZ);
+      int arrY = std::max(0, (45 + mosPos.second) / TILE_SZ);
+      this->tiles_buff[arrY][arrX].type = ItemType::AIR;
+      this->tiles_buff[arrY][arrX].blocking = CanBlock::NO;
+      this->tiles_buff[arrY][arrX].color = (Color){WHITE};
+    }
+  } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+    ii mosPos = this->mouseWorldCoords();
+    if (mosPos.first - this->player->pos.x < 5 * TILE_SZ ||
+        mosPos.first - this->player->pos.y > -5 * TILE_SZ) {
+      int arrX = std::max(0, (SMALL_WORLD_END + mosPos.first) / TILE_SZ);
+      int arrY = std::max(0, (45 + mosPos.second) / TILE_SZ);
+      this->tiles_buff[arrY][arrX].type = ItemType::DIRT;
+      this->tiles_buff[arrY][arrX].blocking = CanBlock::YES;
+      this->tiles_buff[arrY][arrX].color = (Color){BROWN};
     }
   }
   player->hitbox.rect.y = player->pos.y;
@@ -122,7 +138,7 @@ void EventideEngine::updatePlayer(float dt) {
   bool hitObstacle = false;
   for (int y = 0; y < 3 * RENDER_DISTANCE; y++) {
     for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
-      EnvTile tempET = this->tiles_buf[y][x];
+      EnvTile tempET = this->tiles_buff[y][x];
       Vector2 playerPos = player->pos;
       if (tempET.blocking == CanBlock::YES && this->checkCollision(tempET)) {
         std::cout << "Collision handled." << std::endl;
@@ -160,12 +176,17 @@ ii EventideEngine::renderTrees() const {
 }
 
 void EventideEngine::renderTiles() { std::cout << "Do nothing" << std::endl; }
+void EventideEngine::debug() {
+  std::cout << "[DEBUG] SCREEN SIZE [W, H]: " << this->width << " "
+            << this->height << std::endl;
+  std::cout << "[DEBUG] FPS: " << GetFPS() << std::endl;
+  std::cout << "[DEBUG] PLAYER POS [X, Y]: " << this->player->pos.x << " "
+            << this->player->pos.y << std::endl;
+}
 
 EventideEngine::~EventideEngine() {
   delete player;
-  delete wseed;
   player = nullptr;
-  wseed = nullptr;
 }
 
 // put getPlayerIndex into update function, and as class attribute

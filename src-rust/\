@@ -1,0 +1,16 @@
+use std::fs;
+
+pub struct Readers {
+    textures_path: Vec<String>,
+}
+
+impl Readers {
+    pub fn read_textures_path() {
+        let paths = fs::read_dir("../src-engine/resources")
+            .expect("Couldn't read directory ../src-engine/resources!");
+        for path in paths {
+            paths.push(path);
+
+        }
+    }
+}
