@@ -1,10 +1,24 @@
 #pragma once
 #include <cassert>
-#include <string>
-#include <unordered_map>
+#include <iostream>
 
 #include "raylib.h"
-enum class GameState { GAME_ACTIVE = 1, GAME_MENU = 0, GAME_WIN = 2 };
+#define GRASS_TEXTURE \
+  "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/grass-tile.png"
+#define STONE_TEXTURE \
+  "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/stone-tile.png"
+#define DIRT_TEXTURE \
+  "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/dirt-tile.png"
+#define PINE_TEXTURE_PATH \
+  "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/tree-1.png"
+#define OAK_TEXTURE_PATH \
+  "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/tree-2.png"
+enum class GameState {
+  GAME_ACTIVE = 1,
+  GAME_MENU = 0,
+  GAME_WIN = 2,
+  DEBUGGING = 3
+};
 enum class ItemType { AIR = 0, GRASS = 1, DIRT = 2, STONE = 3, PLAYER = 99 };
 enum class CanBlock { YES = 1, NO = 0 };
 
@@ -27,11 +41,9 @@ struct Player {
 
 class ResourceManager {
  public:
-  static std::unordered_map<std::string, Shader> shaders;
-  static std::unordered_map<std::string, Texture> textures;
   static Shader shaderInit();  // not implemented
   static Shader getShaders();  // not implemented
-  static void textureInit();
+  static Texture2D textureInit(const char* path, bool isTile);
   static Texture getTextures();
   static EnvTile tileInit();
   static Player playerInit();

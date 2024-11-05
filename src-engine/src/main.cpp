@@ -1,15 +1,14 @@
 #include <raylib.h>
 
-#include <iostream>
-
 #include "engine.hpp"
 int main() {
   EventideEngine engine(640, 480, 60);
-  engine.eventideInit(33);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(engine.width, engine.height, "Test");
   SetTargetFPS(engine.fps);
   float delta{0};
+  // initialize here
+  engine.eventideInit(313);
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
 
@@ -21,22 +20,32 @@ int main() {
     // render
     // ------
     // engine.Render();
-    ii treesDist = engine.renderTrees();
-    ii mousePos = engine.mouseWorldCoords();
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing();
     BeginMode2D(engine.camera);
     ClearBackground(BLUE);
 
-    for (int idx = treesDist.first; idx < treesDist.second; ++idx) {
-      DrawRectangleRec(engine.tree_buff[idx].rect, engine.tree_buff[idx].color);
+    for (int idx = 0; idx < 1000; ++idx) {
+      if (engine.State == GameState::DEBUGGING) {
+        DrawRectangleRec(engine.tree_buff[idx].rect,
+                         engine.tree_buff[idx].color);
+      } else {
+        DrawTexture(engine.tree_buff[idx].texture, engine.tree_buff[idx].rect.x,
+                    engine.tree_buff[idx].rect.y, WHITE);
+      }
     }
 
     for (int y = 0; y < 3 * RENDER_DISTANCE; ++y) {
       for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
-        DrawRectangleRec(engine.tiles_buff[y][x].rect,
-                         engine.tiles_buff[y][x].color);
+        if (engine.State == GameState::DEBUGGING) {
+          DrawRectangleRec(engine.tiles_buff[y][x].rect,
+                           engine.tiles_buff[y][x].color);
+        } else {
+          DrawTexture(engine.tiles_buff[y][x].texture,
+                      engine.tiles_buff[y][x].rect.x,
+                      engine.tiles_buff[y][x].rect.y, WHITE);
+        }
       }
     }
     DrawRectangleRec(engine.player->hitbox.rect, engine.player->hitbox.color);
@@ -44,8 +53,6 @@ int main() {
     EndDrawing();
     //----------------------------------------------------------------------------------
     engine.debug();
-    std::cout << "MOUSE POS: " << mousePos.first << " " << mousePos.second
-              << std::endl;
   }
 
   // De-Initialization
@@ -59,9 +66,7 @@ int main() {
 // Make Inventory.
 // Add ores.
 // Infinite world generation.
-// Fix placing and destroying.
-// Fix collisions.
-// Add textures.
-// Add multiplayer.
-// Fix code.
-// Add parallax.
+// Fix placing and destroying - works better, the same as down below, add
+// intervals. Fix collisions - works better, add case by case if x < 0 and x >
+// 0 because it is the source of problems. Add textures - done. Add
+// multiplayer. Fix code. Add parallax.
