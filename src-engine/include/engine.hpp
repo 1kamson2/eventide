@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 #include "raylib.h"
@@ -14,6 +15,9 @@ using ii = std::pair<int, int>;
 #define SMALL_WORLD_WIDTH 256
 #define PLAYER_HORIZONTAL_SPEED TILE_SZ
 #define PLAYER_VERTICAL_SPEED 3 * TILE_SZ
+#define MAX_HEALTH_TEXT 100
+#define INVENTORY_ROWS 8
+#define INVENTORY_COLS 3
 
 class EventideEngine {
  public:
@@ -23,18 +27,28 @@ class EventideEngine {
   unsigned int width, height, fps;
   EnvTile tiles_buff[3 * RENDER_DISTANCE][3 * RENDER_DISTANCE], tree_buff[1000];
   std::vector<Vector2> placedRecently, removedRecently;
-  Texture2D grassTexture, stoneTexture, dirtTexture, oakTexture, pineTexture;
+  std::unordered_map<ItemType, Texture2D> textures;
   ii mouseCoords, playerIndex, treeRDist;
   EventideEngine(unsigned int width, unsigned int height, unsigned int fps);
   virtual ~EventideEngine();
 
   void renderTiles();
   void loadTiles();
-
+  // init events
   void eventideInit(unsigned int seed);
   void updatePlayer(float dt);
+  void processInput(float dt);
   ii mouseWorldCoords();
+  ii findEnvPositions();
+  void tileInit(const int& x, const int& y, const float& depth,
+                const Color& color, const ItemType& it, const CanBlock& cb);
+  void treeInit(const int& pos, const Color& color, const CanBlock& cb);
+  void tileUpdate(const int& x, const int& y, const Color& color,
+                  const ItemType& it, const CanBlock& cb);
+  // check conditions
   bool checkCollision(const EnvTile& tempET);
+  bool canModifyEnv();
+  // do updates
   void update(float dt);
   void render();
   void debug();

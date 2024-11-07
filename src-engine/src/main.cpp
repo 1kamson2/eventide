@@ -1,13 +1,13 @@
 #include <raylib.h>
 
 #include "engine.hpp"
+#include "resource_manager.hpp"
 int main() {
-  EventideEngine engine(640, 480, 60);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(engine.width, engine.height, "Test");
-  SetTargetFPS(engine.fps);
+  InitWindow(640, 480, "Test");
+  SetTargetFPS(60);
   float delta{0};
-  // initialize here
+  EventideEngine engine(640, 480, 60);
   engine.eventideInit(313);
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
@@ -30,7 +30,8 @@ int main() {
       if (engine.State == GameState::DEBUGGING) {
         DrawRectangleRec(engine.tree_buff[idx].rect,
                          engine.tree_buff[idx].color);
-      } else {
+      } else if (engine.State == GameState::ACTIVE ||
+                 engine.State == GameState::MENU) {
         DrawTexture(engine.tree_buff[idx].texture, engine.tree_buff[idx].rect.x,
                     engine.tree_buff[idx].rect.y, WHITE);
       }
@@ -41,14 +42,35 @@ int main() {
         if (engine.State == GameState::DEBUGGING) {
           DrawRectangleRec(engine.tiles_buff[y][x].rect,
                            engine.tiles_buff[y][x].color);
-        } else {
+
+        } else if (engine.State == GameState::ACTIVE ||
+                   engine.State == GameState::MENU) {
           DrawTexture(engine.tiles_buff[y][x].texture,
                       engine.tiles_buff[y][x].rect.x,
                       engine.tiles_buff[y][x].rect.y, WHITE);
         }
       }
     }
+    if (engine.State == GameState::MENU) {
+      DrawRectangleRec(engine.player->health.rect, engine.player->health.color);
+      for (int i = 0; i < 9; ++i) {
+        DrawRectangleRec(engine.player->hotbar[i].rect,
+                         engine.player->hotbar[i].color);
+      }
+      for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 8; ++j) {
+          DrawRectangleRec(engine.player->inventory[i][j].rect,
+                           engine.player->inventory[i][j].color);
+        }
+      }
+      DrawText(TextFormat("HEALTH: %d / %d", engine.player->health.quantity,
+                          MAX_HEALTH_TEXT),
+               engine.player->health.rect.x, engine.player->health.rect.y - 20,
+               10, BLACK);
+    }
+
     DrawRectangleRec(engine.player->hitbox.rect, engine.player->hitbox.color);
+
     EndMode2D();
     EndDrawing();
     //----------------------------------------------------------------------------------
