@@ -37,13 +37,15 @@ struct EnvTile {
 };
 
 struct Player {
-  Vector2 pos;
   float speedY{0.0f};
   float speedX{0.0f};
   bool canJump{false};
   bool canGoFaster{false};
-  EnvTile hitbox;
+  bool eastCollision{false};
+  bool westCollision{false};
+  Vector2 pos;
   Texture2D texture;
+  EnvTile hitbox;
   EnvTile hotbar[9];
   EnvTile inventory[3][8];
   EnvTile health;

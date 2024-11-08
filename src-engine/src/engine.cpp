@@ -125,8 +125,9 @@ bool EventideEngine::checkCollision(const EnvTile& tempET) {
   bool collisionY =
       player->pos.y + player->hitbox.rect.height >= tempET.rect.y &&
       tempET.rect.y + tempET.rect.height >= player->pos.y;
-  return collisionX && collisionY;
+  return collisionY && collisionX;
 }
+
 bool EventideEngine::canModifyEnv() {
   return (abs(mouseCoords.first - (int)this->player->pos.x) < 5 * TILE_SZ &&
           abs(mouseCoords.second - (int)this->player->pos.y) < 5 * TILE_SZ);
@@ -138,9 +139,13 @@ ii EventideEngine::findEnvPositions() {
 }
 void EventideEngine::processInput(float dt) {
   if (IsKeyDown(KEY_RIGHT)) {
-    player->pos.x += PLAYER_SPEED_X * dt;
+    if (!this->player->eastCollision) {
+      player->pos.x += PLAYER_SPEED_X * dt;
+    }
   } else if (IsKeyDown(KEY_LEFT)) {
-    player->pos.x -= PLAYER_SPEED_X * dt;
+    if (!this->player->westCollision) {
+      player->pos.x -= PLAYER_SPEED_X * dt;
+    }
   } else if (IsKeyDown(KEY_DOWN) && this->player->canGoFaster) {
     player->pos.y += PLAYER_SPEED_Y * dt;
   } else if (IsKeyDown(KEY_UP) && this->player->canJump) {
@@ -226,14 +231,29 @@ void EventideEngine::updatePlayer(float dt) {
         std::cout << "[DEBUG] Collision detected on: " << tempET.rect.x << " "
                   << tempET.rect.y << std::endl;
         hitObstacle = true;
-        player->speedY = 0.0f;
         playerPos.y = tempET.rect.y;
-        break;
+        player->speedY = 0.0f;
+        if (this->player->pos.y + this->player->hitbox.rect.height >
+            tempET.rect.y + tempET.rect.height) {
+          if (this->player->pos.x - tempET.rect.x - tempET.rect.width < 0) {
+            this->player->westCollision = true;
+          }
+          if (tempET.rect.x - this->player->pos.x -
+                  this->player->hitbox.rect.width <
+              0) {
+            this->player->eastCollision = true;
+          } else {
+            this->player->westCollision = false;
+            this->player->eastCollision = false;
+          }
+        }
       }
     }
   }
   // jumping works weird...
   if (!hitObstacle) {
+    this->player->westCollision = false;
+    this->player->eastCollision = false;
     player->speedY = PLAYER_SPEED_Y;
     player->pos.y += this->player->speedY * dt;
     player->canJump = false;
