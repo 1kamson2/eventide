@@ -1,11 +1,4 @@
 #include "engine.hpp"
-
-#include <raylib.h>
-
-#include <iostream>
-
-#include "resource_manager.hpp"
-
 EventideEngine::EventideEngine(unsigned int width, unsigned int height,
                                unsigned int fps)
     : width{width},
@@ -23,7 +16,7 @@ EventideEngine::EventideEngine(unsigned int width, unsigned int height,
            ResourceManager::textureInit(PINE_TEXTURE_PATH, false)}} {
   // make another function to initialize player
   player->pos = (Vector2){SMALL_WORLD_START + 100, -5 * TILE_SZ};
-  player->speed = 0;
+  player->speedY = 0;
   player->canJump = false;
   player->hitbox.rect =
       (Rectangle){player->pos.x, player->pos.y, TILE_SZ, 3 * TILE_SZ};
@@ -145,13 +138,13 @@ ii EventideEngine::findEnvPositions() {
 }
 void EventideEngine::processInput(float dt) {
   if (IsKeyDown(KEY_RIGHT)) {
-    player->pos.x += PLAYER_HORIZONTAL_SPEED;
+    player->pos.x += PLAYER_SPEED_X * dt;
   } else if (IsKeyDown(KEY_LEFT)) {
-    player->pos.x -= PLAYER_HORIZONTAL_SPEED;
+    player->pos.x -= PLAYER_SPEED_X * dt;
   } else if (IsKeyDown(KEY_DOWN) && this->player->canGoFaster) {
-    player->pos.y += PLAYER_VERTICAL_SPEED * dt;
+    player->pos.y += PLAYER_SPEED_Y * dt;
   } else if (IsKeyDown(KEY_UP) && this->player->canJump) {
-    player->pos.y -= PLAYER_VERTICAL_SPEED;
+    player->pos.y = -PLAYER_JUMP;
     player->canJump = false;
   } else if (IsKeyReleased(KEY_TAB)) {
     switch (this->State) {
@@ -198,29 +191,32 @@ void EventideEngine::processInput(float dt) {
     }
   }
 }
+
 void EventideEngine::updatePlayer(float dt) {
+  // update health ui
   player->hitbox.rect.y = player->pos.y;
   player->hitbox.rect.x = player->pos.x;
   player->health.rect.x = player->pos.x - 125;
   player->health.rect.y = player->pos.y - 70;
+  // update camera
+  camera.target = (Vector2){player->pos.x + player->hitbox.rect.width / 2,
+                            player->pos.y + player->hitbox.rect.height / 2};
   // update hotbar
   for (int i = 0; i < 9; ++i) {
     this->player->hotbar[i].rect =
         (Rectangle){player->pos.x - 62.5f + 1.2f * TILE_SZ * i,
                     player->pos.y + 125, TILE_SZ, TILE_SZ};
-    this->player->hotbar[i].color = RED;
+    this->player->hotbar[i].color = WHITE;
   }
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 8; ++j) {
       this->player->inventory[i][j].rect = (Rectangle){
           player->pos.x - 125.0f + 1.2f * TILE_SZ * i,
           player->pos.y - 50.0f + 1.2f * j * TILE_SZ, TILE_SZ, TILE_SZ};
-      this->player->inventory[i][j].color = RED;
+      this->player->inventory[i][j].color = WHITE;
     }
   }
 
-  camera.target = (Vector2){player->pos.x + player->hitbox.rect.width / 2,
-                            player->pos.y + player->hitbox.rect.height / 2};
   bool hitObstacle = false;
   for (int y = 0; y < 3 * RENDER_DISTANCE; y++) {
     for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
@@ -230,7 +226,7 @@ void EventideEngine::updatePlayer(float dt) {
         std::cout << "[DEBUG] Collision detected on: " << tempET.rect.x << " "
                   << tempET.rect.y << std::endl;
         hitObstacle = true;
-        player->speed = 0.0f;
+        player->speedY = 0.0f;
         playerPos.y = tempET.rect.y;
         break;
       }
@@ -238,8 +234,8 @@ void EventideEngine::updatePlayer(float dt) {
   }
   // jumping works weird...
   if (!hitObstacle) {
-    player->speed = PLAYER_VERTICAL_SPEED;
-    player->pos.y += this->player->speed * dt;
+    player->speedY = PLAYER_SPEED_Y;
+    player->pos.y += this->player->speedY * dt;
     player->canJump = false;
     player->canGoFaster = true;
   } else {

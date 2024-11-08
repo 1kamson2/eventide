@@ -13,8 +13,9 @@ using ii = std::pair<int, int>;
 #define SMALL_WORLD_END (float)2048.0
 #define SMALL_WORLD_DEPTH 96
 #define SMALL_WORLD_WIDTH 256
-#define PLAYER_HORIZONTAL_SPEED TILE_SZ
-#define PLAYER_VERTICAL_SPEED 3 * TILE_SZ
+#define PLAYER_SPEED_X 100.0f
+#define PLAYER_SPEED_Y 300.0f
+#define PLAYER_JUMP 5 * TILE_SZ
 #define MAX_HEALTH_TEXT 100
 #define INVENTORY_ROWS 8
 #define INVENTORY_COLS 3

@@ -1,10 +1,9 @@
 #pragma once
+#include <raylib.h>
+
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
-
-#include "raylib.h"
 #define GRASS_TEXTURE \
   "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/grass-tile.png"
 #define STONE_TEXTURE \
@@ -39,9 +38,10 @@ struct EnvTile {
 
 struct Player {
   Vector2 pos;
-  float speed{0};
-  bool canJump{0};
-  bool canGoFaster{0};
+  float speedY{0.0f};
+  float speedX{0.0f};
+  bool canJump{false};
+  bool canGoFaster{false};
   EnvTile hitbox;
   Texture2D texture;
   EnvTile hotbar[9];

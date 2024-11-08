@@ -11,17 +11,8 @@ int main() {
   engine.eventideInit(313);
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
-
-    // update game state
-    // -----------------
     engine.update(delta);
 
-    // Camera target follows player
-    // render
-    // ------
-    // engine.Render();
-    // Draw
-    //----------------------------------------------------------------------------------
     BeginDrawing();
     BeginMode2D(engine.camera);
     ClearBackground(BLUE);
@@ -73,14 +64,9 @@ int main() {
 
     EndMode2D();
     EndDrawing();
-    //----------------------------------------------------------------------------------
     engine.debug();
   }
-
-  // De-Initialization
-  //--------------------------------------------------------------------------------------
-  CloseWindow();  // Close window and OpenGL context
-  //--------------------------------------------------------------------------------------
+  CloseWindow();
 
   return 0;
 }
