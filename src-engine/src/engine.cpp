@@ -1,4 +1,8 @@
 #include "engine.hpp"
+
+#include <raylib.h>
+
+#include "resource_manager.hpp"
 EventideEngine::EventideEngine(unsigned int width, unsigned int height,
                                unsigned int fps)
     : width{width},
@@ -6,15 +10,33 @@ EventideEngine::EventideEngine(unsigned int width, unsigned int height,
       fps{fps},
       player{new Player},
       State{GameState::ACTIVE},
-      textures{
+      envTextures{
           {ItemType::GRASS, ResourceManager::textureInit(GRASS_TEXTURE, true)},
           {ItemType::STONE, ResourceManager::textureInit(STONE_TEXTURE, true)},
           {ItemType::DIRT, ResourceManager::textureInit(DIRT_TEXTURE, true)},
           {ItemType::OAK_TREE,
            ResourceManager::textureInit(OAK_TEXTURE_PATH, false)},
           {ItemType::PINE_TREE,
-           ResourceManager::textureInit(PINE_TEXTURE_PATH, false)}} {
+           ResourceManager::textureInit(PINE_TEXTURE_PATH, false)},
+          {ItemType::COAL,
+           ResourceManager::textureInit(COAL_TEXTURE_PATH, true)},
+          {ItemType::IRON,
+           ResourceManager::textureInit(IRON_TEXTURE_PATH, true)},
+          {ItemType::DIAMOND,
+           ResourceManager::textureInit(DIAMOND_TEXTURE_PATH, true)}} {
   // make another function to initialize player
+  this->bgTexture[0] = ResourceManager::textureInit(LAYER0, false);
+  this->bgTexture[1] = ResourceManager::textureInit(LAYER1, false);
+  this->bgTexture[2] = ResourceManager::textureInit(LAYER2, false);
+  this->bgTexture[3] = ResourceManager::textureInit(LAYER3, false);
+  this->bgTexture[4] = ResourceManager::textureInit(LAYER4, false);
+  this->bgTexture[5] = ResourceManager::textureInit(LAYER5, false);
+  this->bgTexture[6] = ResourceManager::textureInit(LAYER6, false);
+  this->bgTexture[7] = ResourceManager::textureInit(LAYER7, false);
+  this->bgTexture[8] = ResourceManager::textureInit(LAYER8, false);
+  this->bgTexture[9] = ResourceManager::textureInit(LAYER9, false);
+  this->bgTexture[10] = ResourceManager::textureInit(LAYER10, false);
+  this->bgTexture[11] = ResourceManager::textureInit(LAYER11, false);
   player->pos = (Vector2){SMALL_WORLD_START + 100, -5 * TILE_SZ};
   player->speedY = 0;
   player->canJump = false;
@@ -45,22 +67,37 @@ void EventideEngine::eventideInit(unsigned int seed) {
   for (int y = 0; y < 3 * RENDER_DISTANCE; ++y) {
     depth = -80 + y * TILE_SZ;
     for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
+      int rndBlock = GetRandomValue(0, 100);
       if (depth < 0) {
         // AIR
         this->tileInit(x, y, depth, BLANK, ItemType::AIR, CanBlock::NO);
-      }
-      if (depth == 0) {
+      } else if (depth == 0) {
         // GRASS ENUM
         this->tileInit(x, y, depth, GREEN, ItemType::GRASS, CanBlock::YES);
-      } else if (depth > 0 && depth <= 60) {
-        // DIRT ENUM
-        this->tileInit(x, y, depth, BROWN, ItemType::DIRT, CanBlock::YES);
-      } else if (depth > 60) {
-        int rndBlock = GetRandomValue(0, 100);
-        if (rndBlock >= 0 && rndBlock <= 77) {
+      } else if (depth > 0 && depth <= 20 * TILE_SZ) {
+        if (rndBlock >= 0 && rndBlock <= 98) {
+          // DIRT ENUM
+          this->tileInit(x, y, depth, BROWN, ItemType::DIRT, CanBlock::YES);
+        } else if (rndBlock > 98 && rndBlock <= 100) {
+          // COAL ENUM
+          this->tileInit(x, y, depth, BLACK, ItemType::COAL, CanBlock::YES);
+        }
+      } else if (depth > 20 * TILE_SZ) {
+        if (rndBlock >= 0 && rndBlock <= 60) {
+          // STONE ENUM
           this->tileInit(x, y, depth, GRAY, ItemType::STONE, CanBlock::YES);
-        } else if (rndBlock > 77 && rndBlock <= 100) {
-          this->tileInit(x, y, depth, GRAY, ItemType::DIRT, CanBlock::YES);
+        } else if (rndBlock > 60 && rndBlock <= 70) {
+          // DIRT ENUM
+          this->tileInit(x, y, depth, BROWN, ItemType::DIRT, CanBlock::YES);
+        } else if (rndBlock > 70 && rndBlock <= 90) {
+          // COAL ORE
+          this->tileInit(x, y, depth, BLACK, ItemType::COAL, CanBlock::YES);
+        } else if (rndBlock > 90 && rndBlock <= 97) {
+          // IRON ENUM
+          this->tileInit(x, y, depth, GRAY, ItemType::IRON, CanBlock::YES);
+        } else if (rndBlock > 97 && rndBlock <= 100) {
+          // DIAMOND ORE
+          this->tileInit(x, y, depth, BLUE, ItemType::DIAMOND, CanBlock::YES);
         }
       }
     }
@@ -84,7 +121,7 @@ void EventideEngine::tileInit(const int& x, const int& y, const float& depth,
   this->tiles_buff[y][x].type = it;
   this->tiles_buff[y][x].blocking = cb;
   if (it != ItemType::AIR) {
-    this->tiles_buff[y][x].texture = this->textures[it];
+    this->tiles_buff[y][x].texture = this->envTextures[it];
   }
 }
 
@@ -94,7 +131,7 @@ void EventideEngine::tileUpdate(const int& x, const int& y, const Color& color,
   this->tiles_buff[y][x].blocking = cb;
   this->tiles_buff[y][x].color = color;
   if (it != ItemType::AIR) {
-    this->tiles_buff[y][x].texture = this->textures[it];
+    this->tiles_buff[y][x].texture = this->envTextures[it];
   } else {
     this->tiles_buff[y][x].texture = (Texture2D){0};
   }
@@ -111,10 +148,10 @@ void EventideEngine::treeInit(const int& pos, const Color& color,
   int rndTree = GetRandomValue(0, 1);
   switch (rndTree) {
     case 0:
-      tree_buff[pos].texture = this->textures[ItemType::OAK_TREE];
+      tree_buff[pos].texture = this->envTextures[ItemType::OAK_TREE];
       break;
     case 1:
-      tree_buff[pos].texture = this->textures[ItemType::PINE_TREE];
+      tree_buff[pos].texture = this->envTextures[ItemType::PINE_TREE];
       break;
   }
 }
@@ -135,7 +172,7 @@ bool EventideEngine::canModifyEnv() {
 ii EventideEngine::findEnvPositions() {
   return ii(
       std::max(0.0, floor((SMALL_WORLD_END + mouseCoords.first) / TILE_SZ)),
-      std::max(0.0, floor((96 + mouseCoords.second) / TILE_SZ)));
+      std::max(0.0, floor((6 * TILE_SZ + mouseCoords.second) / TILE_SZ)));
 }
 void EventideEngine::processInput(float dt) {
   if (IsKeyDown(KEY_RIGHT)) {
@@ -168,16 +205,35 @@ void EventideEngine::processInput(float dt) {
   } else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     // bad cast is probable
     if (this->canModifyEnv()) {
+      // add also if positions changed
       ii pos = this->findEnvPositions();
-      if (this->tiles_buff[pos.second][pos.first].type != ItemType::AIR) {
-        this->tileUpdate(pos.first, pos.second, BLANK, ItemType::AIR,
-                         CanBlock::NO);
-        std::cout << "Block destroyed. " << std::endl;
-        if (this->removedRecently.size() >= 10) {
-          this->removedRecently.clear();
+      bool canDestroy = false;
+      ItemType tempET = this->tiles_buff[pos.second][pos.first].type;
+
+      if (tempET != ItemType::AIR) {
+        if (tempET == ItemType::DIRT && this->countdown >= DIRT_DESTROY_TIME) {
+          canDestroy = true;
+        } else if (tempET == ItemType::GRASS &&
+                   this->countdown >= GRASS_DESTROY_TIME) {
+          canDestroy = true;
+        } else if (tempET == ItemType::STONE &&
+                   this->countdown >= STONE_DESTROY_TIME) {
+          canDestroy = true;
+        } else {
+          countdown += dt;
         }
-        this->removedRecently.push_back(
-            (Vector2){(float)pos.first, (float)pos.second});
+        if (canDestroy) {
+          canDestroy = false;
+          this->countdown = 0;
+          this->tileUpdate(pos.first, pos.second, BLANK, ItemType::AIR,
+                           CanBlock::NO);
+          std::cout << "Block destroyed. " << std::endl;
+          if (this->removedRecently.size() >= 10) {
+            this->removedRecently.clear();
+          }
+          this->removedRecently.push_back(
+              (Vector2){(float)pos.first, (float)pos.second});
+        }
       }
     }
   } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
@@ -204,8 +260,11 @@ void EventideEngine::updatePlayer(float dt) {
   player->health.rect.x = player->pos.x - 125;
   player->health.rect.y = player->pos.y - 70;
   // update camera
-  camera.target = (Vector2){player->pos.x + player->hitbox.rect.width / 2,
-                            player->pos.y + player->hitbox.rect.height / 2};
+  if (player->pos.x > SMALL_WORLD_START + 10 * TILE_SZ &&
+      player->pos.x < SMALL_WORLD_END - 10 * TILE_SZ) {
+    camera.target = (Vector2){player->pos.x + player->hitbox.rect.width / 2,
+                              player->pos.y + player->hitbox.rect.height / 2};
+  }
   // update hotbar
   for (int i = 0; i < 9; ++i) {
     this->player->hotbar[i].rect =

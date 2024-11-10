@@ -9,6 +9,9 @@ int main() {
   float delta{0};
   EventideEngine engine(640, 480, 60);
   engine.eventideInit(313);
+  float scrollingBack = 0.0f;
+  float scrollingMid = 0.0f;
+  float scrollingFore = 0.0f;
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
     engine.update(delta);
@@ -17,6 +20,19 @@ int main() {
     BeginMode2D(engine.camera);
     ClearBackground(BLUE);
 
+    for (int idx = 11; idx >= 0; --idx) {
+      if (scrollingBack < -1000) {
+        scrollingBack = 0;
+      }
+      scrollingBack -= 0.001f;
+      DrawTextureEx(engine.bgTexture[idx],
+                    (Vector2){-2048 + scrollingBack, -200}, 0, 1,
+                    WHITE);  //
+      // DrawTexture(engine.bgTexture[idx], -2048, -200, WHITE);
+      DrawTextureEx(engine.bgTexture[idx],
+                    (Vector2){-1948 + scrollingBack, -200}, 0, 1,
+                    WHITE);  //
+    }
     for (int idx = 0; idx < 1000; ++idx) {
       if (engine.State == GameState::DEBUGGING) {
         DrawRectangleRec(engine.tree_buff[idx].rect,
@@ -27,7 +43,6 @@ int main() {
                     engine.tree_buff[idx].rect.y, WHITE);
       }
     }
-
     for (int y = 0; y < 3 * RENDER_DISTANCE; ++y) {
       for (int x = 0; x < 3 * RENDER_DISTANCE; ++x) {
         if (engine.State == GameState::DEBUGGING) {
@@ -70,11 +85,17 @@ int main() {
 
   return 0;
 }
-
-// Make Inventory.
+// bind ui to camera not the player...
+// Make Inventory - done.
 // Add ores.
 // Infinite world generation.
 // Fix placing and destroying - works better, the same as down below, add
 // intervals. Fix collisions - works better, add case by case if x < 0 and x >
 // 0 because it is the source of problems. Add textures - done. Add
-// multiplayer. Fix code. Add parallax.
+// Parallax ----------------------------------------
+// This should be bound to the camera, to create ilusion of depth of the forest.
+// Multiplayer -------------------------------------
+// I would do a world seed structure. There will be seed, so each player could
+// generate his own world and connect. Such a thing will work, because it is
+// pseudorandom, therefore it will yield the same result each time with the same
+// seed.

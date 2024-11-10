@@ -19,6 +19,9 @@ using ii = std::pair<int, int>;
 #define MAX_HEALTH_TEXT 100
 #define INVENTORY_ROWS 8
 #define INVENTORY_COLS 3
+#define GRASS_DESTROY_TIME 120  // 120 frames
+#define DIRT_DESTROY_TIME 120   // 120 frames
+#define STONE_DESTROY_TIME 300  // 300 frames
 
 class EventideEngine {
  public:
@@ -28,8 +31,10 @@ class EventideEngine {
   unsigned int width, height, fps;
   EnvTile tiles_buff[3 * RENDER_DISTANCE][3 * RENDER_DISTANCE], tree_buff[1000];
   std::vector<Vector2> placedRecently, removedRecently;
-  std::unordered_map<ItemType, Texture2D> textures;
+  std::unordered_map<ItemType, Texture2D> envTextures;
+  Texture2D bgTexture[12];  // all layers
   ii mouseCoords, playerIndex, treeRDist;
+  float countdown;
   EventideEngine(unsigned int width, unsigned int height, unsigned int fps);
   virtual ~EventideEngine();
 
