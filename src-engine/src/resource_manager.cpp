@@ -2,9 +2,8 @@
 
 #include <raylib.h>
 
-#include "engine.hpp"
-
-Texture2D ResourceManager::textureInit(const char* path, bool isTile = false) {
+Texture2D ResourceManager::textureInit(const char* path, float width,
+                                       float height) {
   Image img = LoadImage(path);
   if (img.data == NULL) {
     std::cerr << "[WARNING] Image data is null! This error occurred for:"
@@ -12,11 +11,12 @@ Texture2D ResourceManager::textureInit(const char* path, bool isTile = false) {
     std::cerr << path << std::endl;
     exit(0);
   }
-  if (isTile) {
-    ImageResize(&img, TILE_SZ, TILE_SZ);
-  } else {
-    ImageResize(&img, 200, 200);
-  }
+  std::cout << " " << path << std::endl;
+  printf(
+      "[Image info]:\nLoading Image: %s\nWIDTH: %.3f\nHEIGHT: %.3f\nASPECT "
+      "RATIO: %.3f",
+      path, width, height, width / height);
+  ImageResize(&img, width, height);
   Texture2D texture = LoadTextureFromImage(img);
   UnloadImage(img);
   return texture;

@@ -2,8 +2,13 @@
 #include <raylib.h>
 
 #include <cassert>
-#include <cstddef>
+#include <cmath>
 #include <cstdint>
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+
+using ii = std::pair<int, int>;
 #define GRASS_TEXTURE \
   "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/grass-tile.png"
 #define STONE_TEXTURE \
@@ -46,6 +51,28 @@
   "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/Layer_0010_1.png"
 #define LAYER11 \
   "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/Layer_0011_0.png"
+#define PLAYER_TEXTURE \
+  "/home/kums0n-desktop/Dev/Eventide/src-engine/resources/crawler.png"
+#define TILE_SZ (float)16.0
+#define RENDER_DISTANCE 32
+#define SMALL_WORLD_START (float)-2048.0
+#define SMALL_WORLD_END (float)2048.0
+#define SMALL_WORLD_DEPTH 96
+#define SMALL_WORLD_WIDTH 256
+#define PLAYER_SPEED_X 100.0f
+#define PLAYER_SPEED_Y 300.0f
+#define PLAYER_JUMP TILE_SZ
+#define MAX_HEALTH_TEXT 100
+#define INVENTORY_ROWS 8
+#define INVENTORY_COLS 3
+#define GRASS_DESTROY_TIME 120  // 120 frames
+#define DIRT_DESTROY_TIME 120   // 120 frames
+#define STONE_DESTROY_TIME 300  // 300 frames
+#define BACKGROUND_WIDTH 256
+#define BACKGROUND_HEIGHT 256
+#define SCROLL_BACK 0.3f
+#define SCROLL_MID 0.5f
+#define SCROLL_FORE 1.0f
 enum class GameState { ACTIVE = 1, MENU = 2, DEBUGGING = 3, EXIT = -1 };
 enum class ItemType {
   AIR = 0,
@@ -62,38 +89,23 @@ enum class ItemType {
 enum class CanBlock { YES = 1, NO = 0 };
 
 struct EnvTile {
-  Rectangle rect;
-  ItemType type;
-  CanBlock blocking;
-  Color color;
-  Texture2D texture;
+  Rectangle rect = (Rectangle){0, 0, 0, 0};
+  ItemType type{ItemType::AIR};
+  CanBlock blocking{CanBlock::NO};
+  Color color{BLANK};
+  Texture2D texture = (Texture2D){0};
   // BE CAREFUL - WILL RESULT IN OVERFLOW, MORE CHECKING NEEDED.
   uint8_t quantity{1};
-};
-
-struct Player {
-  float speedY{0.0f};
-  float speedX{0.0f};
-  bool canJump{false};
-  bool canGoFaster{false};
-  bool eastCollision{false};
-  bool westCollision{false};
-  Vector2 pos;
-  Texture2D texture;
-  EnvTile hitbox;
-  EnvTile hotbar[9];
-  EnvTile inventory[3][8];
-  EnvTile health;
 };
 
 class ResourceManager {
  public:
   static Shader shaderInit();  // not implemented
   static Shader getShaders();  // not implemented
-  static Texture2D textureInit(const char* path, bool isTile);
+  static Texture2D textureInit(const char* path, float width = 16,
+                               float height = 16);
   static Texture getTextures();
   static EnvTile tileInit();
-  static Player playerInit();
-  static void Clear();
+  static void clear();
   ResourceManager() = delete;  // might cause problem? undo delete if so
 };

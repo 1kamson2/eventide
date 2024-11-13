@@ -21,17 +21,60 @@ int main() {
     ClearBackground(BLUE);
 
     for (int idx = 11; idx >= 0; --idx) {
-      if (scrollingBack < -1000) {
-        scrollingBack = 0;
+      if (engine.player->lastPressed == KEY_RIGHT) {
+        scrollingBack -= SCROLL_BACK;
+        scrollingMid -= SCROLL_MID;
+        scrollingFore -= SCROLL_FORE;
+      } else if (engine.player->lastPressed == KEY_LEFT) {
+        scrollingBack += SCROLL_BACK;
+        scrollingMid += SCROLL_MID;
+        scrollingFore += SCROLL_FORE;
       }
-      scrollingBack -= 0.001f;
-      DrawTextureEx(engine.bgTexture[idx],
-                    (Vector2){-2048 + scrollingBack, -200}, 0, 1,
-                    WHITE);  //
-      // DrawTexture(engine.bgTexture[idx], -2048, -200, WHITE);
-      DrawTextureEx(engine.bgTexture[idx],
-                    (Vector2){-1948 + scrollingBack, -200}, 0, 1,
-                    WHITE);  //
+      if (idx >= 8) {
+        DrawTextureEx(engine.bgTexture[idx],
+                      (Vector2){engine.player->pos.x + scrollingBack, -256}, 0,
+                      1, WHITE);
+        // DrawTexture(engine.bgTexture[idx], -2048, -200, WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x - 256 + scrollingBack, -256}, 0, 1,
+            WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x + 256 + scrollingBack, -256}, 0, 1,
+            WHITE);
+      } else if (idx >= 5 && idx < 8) {
+        DrawTextureEx(engine.bgTexture[idx],
+                      (Vector2){engine.player->pos.x + scrollingMid, -256}, 0,
+                      1, WHITE);
+        // DrawTexture(engine.bgTexture[idx], -2048, -200, WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x - 256 + scrollingMid, -256}, 0, 1,
+            WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x + 256 + scrollingMid, -256}, 0, 1,
+            WHITE);
+      } else if (idx >= 0 && idx < 5) {
+        DrawTextureEx(engine.bgTexture[idx],
+                      (Vector2){engine.player->pos.x + scrollingFore, -256}, 0,
+                      1, WHITE);
+        // DrawTexture(engine.bgTexture[idx], -2048, -200, WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x - 256 + scrollingFore, -256}, 0, 1,
+            WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x + 256 + scrollingFore, -256}, 0, 1,
+            WHITE);
+        DrawTextureEx(
+            engine.bgTexture[idx],
+            (Vector2){engine.player->pos.x + 512 + scrollingFore, -256}, 0, 1,
+            WHITE);
+      }
+      engine.player->lastPressed = 0;
     }
     for (int idx = 0; idx < 1000; ++idx) {
       if (engine.State == GameState::DEBUGGING) {
@@ -85,17 +128,15 @@ int main() {
 
   return 0;
 }
-// bind ui to camera not the player...
-// Make Inventory - done.
-// Add ores.
+// bind ui to camera not the player... - done
 // Infinite world generation.
 // Fix placing and destroying - works better, the same as down below, add
 // intervals. Fix collisions - works better, add case by case if x < 0 and x >
 // 0 because it is the source of problems. Add textures - done. Add
 // Parallax ----------------------------------------
-// This should be bound to the camera, to create ilusion of depth of the forest.
-// Multiplayer -------------------------------------
-// I would do a world seed structure. There will be seed, so each player could
-// generate his own world and connect. Such a thing will work, because it is
-// pseudorandom, therefore it will yield the same result each time with the same
-// seed.
+// This should be bound to the camera, to create ilusion of depth of the
+// forest. - done
+// Multiplayer ------------------------------------- I would do a
+// world seed structure. There will be seed, so each player could generate his
+// own world and connect. Such a thing will work, because it is pseudorandom,
+// therefore it will yield the same result each time with the same seed.
