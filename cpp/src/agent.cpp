@@ -15,19 +15,8 @@ Agent::Agent() {
   this->rotate_speed = CAMERA_DEFAULT_ROTATE_FACTOR;
   this->cameraMode = CAMERA_DEFAULT_MODE;
   this->camera = this->CameraInit();
-  this->cursor = this->CursorInit();
-}
-
-EnvironmentObject Agent::CursorInit() {
-  EnvironmentObject cursorobj{};
-  cursorobj.BLOCK = BLOCKING_ID::NO;
-  cursorobj.AGENT = IS_AGENT_IDENTIFIER::YES;
-  cursorobj.width = CURSOR_LENGTH;
-  cursorobj.height = CURSOR_LENGTH;
-  cursorobj.length = CURSOR_LENGTH;
-  cursorobj.position = this->camera.target;
-  cursorobj.color = RED;
-  return cursorobj;
+  this->cursor =
+      Environment::ConstructVoxel(this->camera.target, CURSOR_LENGTH);
 }
 
 Camera Agent::CameraInit() {
@@ -40,33 +29,33 @@ Camera Agent::CameraInit() {
   return camera;
 }
 
-void Agent::AgentUpdate(CameraUpdateState state) {
+void Agent::AgentUpdate(EnvironmentState state) {
   float deltax = 0.0f, deltay = 0.0f, deltavert = 0.0f, deltahoriz = 0.0f;
   switch (state) {
-    case CameraUpdateState::MOVE_X_NORTH:
+    case EnvironmentState::MOVE_X_NORTH:
       deltax = this->movement_speed;
       this->x += deltax;
       break;
-    case CameraUpdateState::MOVE_X_SOUTH:
+    case EnvironmentState::MOVE_X_SOUTH:
       deltax = -this->movement_speed;
       this->x -= deltax;
       break;
-    case CameraUpdateState::MOVE_X_EAST:
+    case EnvironmentState::MOVE_X_EAST:
       deltay = -this->movement_speed;
       this->y -= deltay;
       break;
-    case CameraUpdateState::MOVE_X_WEST:
+    case EnvironmentState::MOVE_X_WEST:
       deltay = this->movement_speed;
       this->y += deltay;
       break;
-    case CameraUpdateState::ROLL:
+    case EnvironmentState::ROLL:
       // for now no rolling
       this->roll += 0.0f;
       break;
-    case CameraUpdateState::PROJECTION:
+    case EnvironmentState::PROJECTION:
       this->CameraChangeProjection();
       break;
-    case CameraUpdateState::IDLE:
+    case EnvironmentState::IDLE:
       /* Default state */
       break;
     default:

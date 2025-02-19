@@ -15,15 +15,20 @@
 #define CAMERA_DEFAULT_X_FACTOR 0.1f
 #define CAMERA_DEFAULT_ROTATE_FACTOR 0.05f
 #define CAMERA_DEFAULT_MAX_SPEED 1.0f
+/* The unit is chunk */
+#define CAMERA_DEFAULT_RENDER_DISTANCE 1.0f
+#define CAMERA_DEFAULT_RENDER_DEPTH 0.5f
 
-enum class CameraUpdateState {
+enum class EnvironmentState {
   MOVE_X_NORTH = 0,
   MOVE_X_SOUTH = 1,
   MOVE_X_EAST = 2,
   MOVE_X_WEST = 3,
   ROLL = 4,
   PROJECTION = 5,
-  IDLE = 6
+  IDLE = 6,
+  TRY_TO_DESTROY = 100,
+  TRY_TO_CREATE = 101,
 };
 
 class Agent {
@@ -31,10 +36,9 @@ class Agent {
   mutable float x, y, z, yaw, pitch, roll, movement_speed, rotate_speed;
   Agent();
   // Agent(params);
-  void AgentUpdate(CameraUpdateState state);
+  void AgentUpdate(EnvironmentState state);
 
   EnvironmentObject cursor;
-  EnvironmentObject CursorInit();
   int cameraMode;
   Camera camera;
   Camera CameraInit();

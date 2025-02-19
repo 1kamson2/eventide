@@ -6,9 +6,9 @@
 #include "environment.hpp"
 
 Engine::Engine() {
-  this->width = 1280;
-  this->height = 960;
-  this->fps = 144;
+  this->width = 640;
+  this->height = 480;
+  this->fps = 60;
   this->gravity = 9.80f;
   this->env = Environment::CreateDefaultEnvironment();
   this->AgentInstance = Agent();
@@ -37,17 +37,18 @@ void Engine::ProcessInput(const float& delta) {
     this->recent_env_state = EnvironmentState::MOVE_X_WEST;
     AgentInstance.AgentUpdate(this->recent_env_state);
   }
-  /* Here we won't execute the ModifyEnvironment(...) function, because
-   * the state of variable collision_where is not known at this time.
-   * Function is invoked in Update(...) function.
-   */
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    /* Here we won't execute the ModifyEnvironment(...) function, because
+     * the state of variable collision_where is not known at this time.
+     * Function is invoked in Update(...) function.
+     */
     this->recent_env_state = EnvironmentState::TRY_TO_DESTROY;
-  } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-    this->recent_env_state = EnvironmentState::TRY_TO_CREATE;
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+      this->recent_env_state = EnvironmentState::TRY_TO_CREATE;
+    }
   } else {
-    this->recent_env_state = EnvironmentState::IDLE;
-    AgentInstance.AgentUpdate(this->recent_env_state);
+    AgentInstance.AgentUpdate(EnvironmentState::IDLE);
   }
 }
 
@@ -55,11 +56,8 @@ void Engine::Update(const float& delta) {
   /* Keep in mind, that the processing the input should be first */
   this->ProcessInput(delta);
   this->DetectCollision(delta);
-  /* this->collision_where is updated after DetectCollision(...) */
-  if (this->collision_where != -1 &&
-      (this->recent_env_state == EnvironmentState::TRY_TO_DESTROY ||
-       this->recent_env_state == EnvironmentState::TRY_TO_CREATE)) {
-    this->ModifyEnvironment(delta);
+  if (this->collision_where != -1) {
+    this->ModifyEnvironment()
   }
   this->RenderVoxels(delta);
   this->DebugInfo();
@@ -79,42 +77,18 @@ void Engine::DetectCollision(const float& delta) {
 
 void Engine::RenderVoxels(const float& delta) {
   for (int i = 0; i < MAX_OBJECTS_IN_AREA; i++) {
-    if (!Environment::IsBlank(env[i].color) && this->IsVoxelInView(delta, i)) {
-      DrawCube(env[i].position, env[i].length, env[i].length, env[i].length,
-               env[i].color);
-    }
-    if (this->collision_where != -1) {
-      int j = this->collision_where;
-      DrawCubeWires(env[j].position, env[j].length, env[j].length,
-                    env[j].length, BLACK);
-    }
+    DrawCube(env[i].position, env[i].width, env[i].height, env[i].length,
+             env[i].color);
+    DrawCubeWires(env[i].position, env[i].width, env[i].height, env[i].length,
+                  BLACK);
   }
 }
 
-bool Engine::IsVoxelInView(const float& delta, const int& which_voxel) const {
-  EnvironmentObject voxel = this->env[which_voxel];
-  double delta_x_vector =
-      std::abs(voxel.position.x - this->AgentInstance.camera.position.x);
-  double delta_y_vector =
-      std::abs(voxel.position.y - this->AgentInstance.camera.position.y);
-  double delta_z_vector =
-      std::abs(voxel.position.z - this->AgentInstance.camera.position.z);
-  return (delta_x_vector < CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE &&
-          delta_y_vector < CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE &&
-          delta_z_vector < CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE);
-}
-
-void Engine::ModifyEnvironment(const float& delta) {
-  switch (this->recent_env_state) {
-    case EnvironmentState::TRY_TO_DESTROY: {
-      std::cout << "[INFO] Destroyed block" << std::endl;
-      EnvironmentObject voxel_to_destroy = this->env[this->collision_where];
-      this->env[this->collision_where] = Environment::ConstructVoxel(
-          voxel_to_destroy.position, voxel_to_destroy.length);
+void Engine::ModifyEnvironment(const float& delta, EnvironmentState state) {
+  switch (state) {
+    case EnvironmentState::TRY_TO_DESTROY:
       break;
-    }
     case EnvironmentState::TRY_TO_CREATE:
-      std::cout << "[WARNING] Not implemented, nothing changes. " << std::endl;
       break;
     default:
       std::cout << "[WARNING] Unhandled state in ModifyEnvironment(). "
@@ -124,7 +98,6 @@ void Engine::ModifyEnvironment(const float& delta) {
 }
 
 void Engine::DebugInfo() {
-  printf("[Current FPS]: fps=%d\n", GetFPS());
   printf("[Camera position]: x=%f y=%f z=%f\n",
          this->AgentInstance.camera.position.x,
          this->AgentInstance.camera.position.y,
