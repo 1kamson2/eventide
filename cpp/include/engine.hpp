@@ -2,6 +2,7 @@
 #include <raylib.h>
 
 #include <iostream>
+#include <vector>
 
 #include "agent.hpp"
 #include "environment.hpp"
@@ -12,16 +13,19 @@ class Engine {
   // Engine(params);
   Agent AgentInstance;
   int width, height, fps, collision_where;
+  int max_voxels_in_view;
   double gravity;
-  EnvironmentObject* env;
-  // EnvironmentObject* env_render_buffer;
+  mutable std::vector<EnvironmentObject> env;
+  mutable std::vector<EnvironmentObject> env_render_buffer;
   mutable EnvironmentState recent_env_state;
 
   void ProcessInput(const float& delta);
   void RenderVoxels(const float& delta);
   bool IsVoxelInView(const float& delta, const int& which_voxel) const;
+  void FindVoxelsInView(const float& delta);
   void Update(const float& delta);
   void DetectCollision(const float& delta);
   void ModifyEnvironment(const float& delta);
+  std::vector<EnvironmentObject> LoadEnvironmentBuffer();
   void DebugInfo();
 };

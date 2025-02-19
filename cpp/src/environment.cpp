@@ -1,9 +1,11 @@
 #include "environment.hpp"
 
+#include <cassert>
+
 #include "resource_manager.hpp"
 
-EnvironmentObject* Environment::CreateDefaultEnvironment() {
-  EnvironmentObject* obstacles = new EnvironmentObject[MAX_OBJECTS_IN_AREA];
+std::vector<EnvironmentObject> Environment::CreateDefaultEnvironment() {
+  std::vector<EnvironmentObject> obstacles{};
   int currently_rendered = 0;
   /* The code down below renders 3 x 3 x 3 block of chunks */
   /* Constructs levels of the block */
@@ -16,16 +18,18 @@ EnvironmentObject* Environment::CreateDefaultEnvironment() {
         for (int level = 0; level < CHUNK_SIZE; ++level) {
           for (int width = 0; width < CHUNK_SIZE; ++width) {
             for (int length = 0; length < CHUNK_SIZE; ++length) {
-              obstacles[currently_rendered].BLOCK = BLOCKING_ID::YES;
-              obstacles[currently_rendered].AGENT = IS_AGENT_IDENTIFIER::NO;
-              obstacles[currently_rendered].length = EDGE_LENGTH;
-              obstacles[currently_rendered].position =
+              EnvironmentObject voxel{};
+              voxel.BLOCK = BLOCKING_ID::YES;
+              voxel.AGENT = IS_AGENT_IDENTIFIER::NO;
+              voxel.length = EDGE_LENGTH;
+              voxel.position =
                   (Vector3){EDGE_LENGTH * length + (col * CHUNK_SIZE),
                             -level * EDGE_LENGTH - (row_level * CHUNK_SIZE),
                             EDGE_LENGTH * width + (row * CHUNK_SIZE)};
-              obstacles[currently_rendered].color =
+              voxel.color =
                   (Color){(unsigned char)GetRandomValue(20, 255),
                           (unsigned char)GetRandomValue(10, 55), 30, 255};
+              obstacles.push_back(voxel);
               ++currently_rendered;
             }
           }
@@ -33,7 +37,7 @@ EnvironmentObject* Environment::CreateDefaultEnvironment() {
       }
     }
   }
-
+  assert(currently_rendered < MAX_OBJECTS_IN_AREA);
   return obstacles;
 }
 

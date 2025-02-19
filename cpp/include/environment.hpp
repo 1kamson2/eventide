@@ -2,6 +2,8 @@
 #include <math.h>
 #include <raylib.h>
 
+#include <vector>
+
 #include "resource_manager.hpp"
 
 #define MAX_OBJECTS_IN_AREA 1 << 18
@@ -21,7 +23,7 @@ struct EnvironmentObject {
 
 class Environment {
  public:
-  static EnvironmentObject* CreateDefaultEnvironment();
+  static std::vector<EnvironmentObject> CreateDefaultEnvironment();
   static bool IsInsideAABB(const EnvironmentObject& cursor,
                            const EnvironmentObject& voxel);
   static bool IsBlank(Color color);

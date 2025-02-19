@@ -12,7 +12,6 @@ int main() {
   SetTargetFPS(run.fps);
   DisableCursor();
   float delta;
-  EnvironmentObject* env = Environment::CreateDefaultEnvironment();
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
 

@@ -10,7 +10,11 @@ Engine::Engine() {
   this->height = 960;
   this->fps = 144;
   this->gravity = 9.80f;
+  this->max_voxels_in_view = (int)(CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
+                                   CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
+                                   CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE);
   this->env = Environment::CreateDefaultEnvironment();
+  this->env_render_buffer = this->LoadEnvironmentBuffer();
   this->AgentInstance = Agent();
   this->collision_where = -1;
   this->recent_env_state = EnvironmentState::IDLE;
@@ -54,6 +58,7 @@ void Engine::ProcessInput(const float& delta) {
 void Engine::Update(const float& delta) {
   /* Keep in mind, that the processing the input should be first */
   this->ProcessInput(delta);
+  this->FindVoxelsInView(delta);
   this->DetectCollision(delta);
   /* this->collision_where is updated after DetectCollision(...) */
   if (this->collision_where != -1 &&
@@ -65,11 +70,26 @@ void Engine::Update(const float& delta) {
   this->DebugInfo();
 }
 
+void Engine::FindVoxelsInView(const float& delta) {
+  /* TODO: Bug where if we leave an area it crashes, also there are bugs in
+   * finding the correct voxels */
+  int currently_found = 0;
+  for (int voxel = 0; voxel < MAX_OBJECTS_IN_AREA &&
+                      currently_found < this->max_voxels_in_view;
+       ++voxel) {
+    if (this->IsVoxelInView(delta, voxel)) {
+      this->env_render_buffer[currently_found] = this->env[voxel];
+      ++currently_found;
+    }
+  }
+}
+
 void Engine::DetectCollision(const float& delta) {
   /* Return the first collision */
   this->collision_where = -1;
-  for (int i = 0; i < MAX_OBJECTS_IN_AREA; ++i) {
-    if (Environment::IsInsideAABB(this->AgentInstance.cursor, this->env[i])) {
+  for (int i = 0; i < this->max_voxels_in_view; ++i) {
+    if (Environment::IsInsideAABB(this->AgentInstance.cursor,
+                                  this->env_render_buffer[i])) {
       this->collision_where = i;
       return;
     }
@@ -78,15 +98,19 @@ void Engine::DetectCollision(const float& delta) {
 }
 
 void Engine::RenderVoxels(const float& delta) {
-  for (int i = 0; i < MAX_OBJECTS_IN_AREA; i++) {
-    if (!Environment::IsBlank(env[i].color) && this->IsVoxelInView(delta, i)) {
-      DrawCube(env[i].position, env[i].length, env[i].length, env[i].length,
-               env[i].color);
+  for (int i = 0; i < this->max_voxels_in_view; i++) {
+    if (!Environment::IsBlank(this->env_render_buffer[i].color)) {
+      DrawCube(
+          this->env_render_buffer[i].position,
+          this->env_render_buffer[i].length, this->env_render_buffer[i].length,
+          this->env_render_buffer[i].length, this->env_render_buffer[i].color);
     }
     if (this->collision_where != -1) {
       int j = this->collision_where;
-      DrawCubeWires(env[j].position, env[j].length, env[j].length,
-                    env[j].length, BLACK);
+      DrawCubeWires(this->env_render_buffer[j].position,
+                    this->env_render_buffer[j].length,
+                    this->env_render_buffer[j].length,
+                    this->env_render_buffer[j].length, BLACK);
     }
   }
 }
@@ -108,9 +132,11 @@ void Engine::ModifyEnvironment(const float& delta) {
   switch (this->recent_env_state) {
     case EnvironmentState::TRY_TO_DESTROY: {
       std::cout << "[INFO] Destroyed block" << std::endl;
-      EnvironmentObject voxel_to_destroy = this->env[this->collision_where];
-      this->env[this->collision_where] = Environment::ConstructVoxel(
-          voxel_to_destroy.position, voxel_to_destroy.length);
+      EnvironmentObject voxel_to_destroy =
+          this->env_render_buffer[this->collision_where];
+      this->env_render_buffer[this->collision_where] =
+          Environment::ConstructVoxel(voxel_to_destroy.position,
+                                      voxel_to_destroy.length);
       break;
     }
     case EnvironmentState::TRY_TO_CREATE:
@@ -121,6 +147,14 @@ void Engine::ModifyEnvironment(const float& delta) {
                 << std::endl;
       break;
   }
+}
+
+std::vector<EnvironmentObject> Engine::LoadEnvironmentBuffer() {
+  std::vector<EnvironmentObject> buffer;
+  for (int voxel = 0; voxel < this->max_voxels_in_view; ++voxel) {
+    buffer.push_back(this->env[voxel]);
+  }
+  return buffer;
 }
 
 void Engine::DebugInfo() {
