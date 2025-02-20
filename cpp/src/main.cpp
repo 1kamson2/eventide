@@ -19,7 +19,7 @@ int main() {
     ClearBackground(BLUE);
     BeginMode3D(run.AgentInstance.camera);
     run.Update(delta);
-    /* Remove this later */
+    /* TODO: Use meshing instead of drawing cubes. */
     EnvironmentObject cursor = run.AgentInstance.cursor;
     DrawCube(cursor.position, cursor.length, cursor.length, cursor.length,
              GREEN);

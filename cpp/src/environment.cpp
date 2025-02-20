@@ -4,8 +4,10 @@
 
 #include "resource_manager.hpp"
 
-std::vector<EnvironmentObject> Environment::CreateDefaultEnvironment() {
-  std::vector<EnvironmentObject> obstacles{};
+std::vector<std::shared_ptr<VoxelNode>>
+Environment::CreateDefaultEnvironment() {
+  /* Returns the vector of shared pointers to the Voxel Nodes */
+  std::vector<std::shared_ptr<VoxelNode>> obstacles{};
   int currently_rendered = 0;
   /* The code down below renders 3 x 3 x 3 block of chunks */
   /* Constructs levels of the block */
@@ -18,18 +20,15 @@ std::vector<EnvironmentObject> Environment::CreateDefaultEnvironment() {
         for (int level = 0; level < CHUNK_SIZE; ++level) {
           for (int width = 0; width < CHUNK_SIZE; ++width) {
             for (int length = 0; length < CHUNK_SIZE; ++length) {
-              EnvironmentObject voxel{};
-              voxel.BLOCK = BLOCKING_ID::YES;
-              voxel.AGENT = IS_AGENT_IDENTIFIER::NO;
-              voxel.length = EDGE_LENGTH;
-              voxel.position =
+              Voxel voxel(
+                  BLOCKING_ID::YES, IS_AGENT_IDENTIFIER::NO, EDGE_LENGTH,
                   (Vector3){EDGE_LENGTH * length + (col * CHUNK_SIZE),
                             -level * EDGE_LENGTH - (row_level * CHUNK_SIZE),
-                            EDGE_LENGTH * width + (row * CHUNK_SIZE)};
-              voxel.color =
+                            EDGE_LENGTH * width + (row * CHUNK_SIZE)},
                   (Color){(unsigned char)GetRandomValue(20, 255),
-                          (unsigned char)GetRandomValue(10, 55), 30, 255};
-              obstacles.push_back(voxel);
+                          (unsigned char)GetRandomValue(10, 55), 30, 255});
+              obstacles.push_back(
+                  std::make_shared<VoxelNode>(VoxelNode(voxel)));
               ++currently_rendered;
             }
           }
@@ -45,8 +44,7 @@ bool Environment::IsBlank(Color color) {
   return color.a == 0 && color.b == 0 && color.g == 0 && color.r == 0;
 }
 
-bool Environment::IsInsideAABB(const EnvironmentObject& cursor,
-                               const EnvironmentObject& voxel) {
+bool Environment::IsInsideAABB(const Voxel& cursor, const Voxel& voxel) {
   /* If the cursor is small enough it behaves as if point */
   return ((cursor.position.x + CURSOR_LENGTH) >=
               (voxel.position.x - EDGE_LENGTH / 2) &&
@@ -60,25 +58,14 @@ bool Environment::IsInsideAABB(const EnvironmentObject& cursor,
           voxel.BLOCK == BLOCKING_ID::YES);
 }
 
-EnvironmentObject Environment::ConstructVoxel(Vector3 position, float length) {
-  EnvironmentObject voxel{};
-  voxel.BLOCK = BLOCKING_ID::NO;
-  voxel.AGENT = IS_AGENT_IDENTIFIER::YES;
-  voxel.length = length;
-  voxel.position = position;
-  voxel.color = BLANK;
+Voxel Environment::ConstructVoxel(Vector3 position, float length) {
+  Voxel voxel(BLOCKING_ID::NO, IS_AGENT_IDENTIFIER::YES, length, position, RED);
   return voxel;
 }
 
-EnvironmentObject Environment::ConstructVoxel(BLOCKING_ID does_block,
-                                              IS_AGENT_IDENTIFIER is_agent,
-                                              float length, Vector3 position,
-                                              Color color) {
-  EnvironmentObject voxel_custom{};
-  voxel_custom.BLOCK = does_block;
-  voxel_custom.AGENT = is_agent;
-  voxel_custom.length = length;
-  voxel_custom.position = position;
-  voxel_custom.color = color;
+Voxel Environment::ConstructVoxel(BLOCKING_ID does_block,
+                                  IS_AGENT_IDENTIFIER is_agent, float length,
+                                  Vector3 position, Color color) {
+  Voxel voxel_custom(does_block, is_agent, length, position, color);
   return voxel_custom;
 }

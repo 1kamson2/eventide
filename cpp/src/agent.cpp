@@ -16,17 +16,17 @@ Agent::Agent() {
   this->cameraMode = CAMERA_DEFAULT_MODE;
   this->camera = this->CameraInit();
   this->cursor =
-      Environment::ConstructVoxel(this->camera.target, CURSOR_LENGTH);
+      Environment::ConstructVoxel(this->camera->target, CURSOR_LENGTH);
 }
 
-Camera Agent::CameraInit() {
+std::shared_ptr<Camera> Agent::CameraInit() {
   Camera camera = {0};
   camera.position = (Vector3){this->x, this->y, this->z};
   camera.target = CAMERA_DEFAULT_TARGET;
   camera.up = CAMERA_DEFAULT_ROTATION;
   camera.fovy = CAMERA_DEFAULT_FOV;
   camera.projection = CAMERA_DEFAULT_PERSPECTIVE;
-  return camera;
+  return std::make_shared<Camera>(camera);
 }
 
 void Agent::AgentUpdate(EnvironmentState state) {
@@ -64,32 +64,32 @@ void Agent::AgentUpdate(EnvironmentState state) {
   /* TODO: Put a cap, consider negative values */
   deltavert = GetMouseDelta().x * this->rotate_speed;
   deltahoriz = GetMouseDelta().y * this->rotate_speed;
-  this->camera.up = (Vector3){this->yaw, this->pitch, this->roll};
-  UpdateCameraPro(&this->camera, (Vector3){deltax, deltay, 0.0f},
+  this->camera->up = (Vector3){this->yaw, this->pitch, this->roll};
+  UpdateCameraPro((Camera*)&this->camera, (Vector3){deltax, deltay, 0.0f},
                   (Vector3){deltavert, deltahoriz, 0.0f},
                   GetMouseWheelMove() * 0.0f);
-  this->cursor.position = this->camera.target;
+  this->cursor.position = this->camera->target;
 }
 
 void Agent::CameraChangeProjection() {
-  switch (camera.projection) {
+  switch (camera->projection) {
     case CAMERA_PERSPECTIVE:
       this->cameraMode = CAMERA_THIRD_PERSON;
-      this->camera.position = (Vector3){0.0f, 2.0f, -100.0f};
-      this->camera.target = (Vector3){0.0f, 2.0f, 0.0f};
-      this->camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-      this->camera.projection = CAMERA_ORTHOGRAPHIC;
-      this->camera.fovy = 20.0f;  // near plane width in CAMERA_ORTHOGRAPHIC
-      CameraYaw(&camera, -135 * DEG2RAD, true);
-      CameraPitch(&camera, -45 * DEG2RAD, true, true, false);
+      this->camera->position = (Vector3){0.0f, 2.0f, -100.0f};
+      this->camera->target = (Vector3){0.0f, 2.0f, 0.0f};
+      this->camera->up = (Vector3){0.0f, 1.0f, 0.0f};
+      this->camera->projection = CAMERA_ORTHOGRAPHIC;
+      this->camera->fovy = 20.0f;  // near plane width in CAMERA_ORTHOGRAPHIC
+      CameraYaw((Camera*)&camera, -135 * DEG2RAD, true);
+      CameraPitch((Camera*)&camera, -45 * DEG2RAD, true, true, false);
       break;
     case CAMERA_ORTHOGRAPHIC:
       this->cameraMode = CAMERA_THIRD_PERSON;
-      this->camera.position = (Vector3){0.0f, 2.0f, 10.0f};
-      this->camera.target = (Vector3){0.0f, 2.0f, 0.0f};
-      this->camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-      this->camera.projection = CAMERA_PERSPECTIVE;
-      this->camera.fovy = 60.0f;
+      this->camera->position = (Vector3){0.0f, 2.0f, 10.0f};
+      this->camera->target = (Vector3){0.0f, 2.0f, 0.0f};
+      this->camera->up = (Vector3){0.0f, 1.0f, 0.0f};
+      this->camera->projection = CAMERA_PERSPECTIVE;
+      this->camera->fovy = 60.0f;
       break;
   }
 }

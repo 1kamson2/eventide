@@ -40,8 +40,8 @@ class Agent {
 
   EnvironmentObject cursor;
   int cameraMode;
-  Camera camera;
-  Camera CameraInit();
+  std::shared_ptr<Camera> camera;
+  std::shared_ptr<Camera> CameraInit();
   void CameraChangeProjection();
 
  private:
