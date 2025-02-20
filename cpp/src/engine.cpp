@@ -10,9 +10,10 @@ Engine::Engine() {
   this->height = 960;
   this->fps = 144;
   this->gravity = 9.80f;
-  this->max_voxels_in_view = (int)(CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
-                                   CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
-                                   CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE);
+  this->max_voxels_in_view =
+      (int)(2 * CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
+            CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
+            CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE);
   this->env = Environment::CreateDefaultEnvironment();
   this->env_render_buffer = this->LoadEnvironmentBuffer();
   this->AgentInstance = Agent();
@@ -73,6 +74,7 @@ void Engine::Update(const float& delta) {
 void Engine::FindVoxelsInView(const float& delta) {
   /* TODO: Bug where if we leave an area it crashes, also there are bugs in
    * finding the correct voxels */
+  /* Probably I should start looking from the players position */
   int currently_found = 0;
   for (int voxel = 0; voxel < MAX_OBJECTS_IN_AREA &&
                       currently_found < this->max_voxels_in_view;
@@ -129,6 +131,8 @@ bool Engine::IsVoxelInView(const float& delta, const int& which_voxel) const {
 }
 
 void Engine::ModifyEnvironment(const float& delta) {
+  /* TODO: Fix the bug, destroying doesn't work, because we do not update, the
+   * environment buffer */
   switch (this->recent_env_state) {
     case EnvironmentState::TRY_TO_DESTROY: {
       std::cout << "[INFO] Destroyed block" << std::endl;
