@@ -9,11 +9,10 @@ Engine::Engine() {
                                    CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE);
 
   this->AgentInstance = Agent();
-  this->env_buffer = Environment::CreateDefaultEnvironment();
+  this->voxel_buffer = Environment::CreateDefaultEnvironment();
   /* Initialize KDTree */
-  this->env_to_render = std::make_unique<KDTree>();
-  this->TEMP_RENDER_BUFFER = std::vector<std::shared_ptr<VoxelNode>>();
-  this->LoadEnvironmentBuffer();
+  this->kdtree = std::make_unique<KDTree>();
+  this->KDTreeLoad();
 
   this->collision_where = -1;
   this->recent_env_state = EnvironmentState::IDLE;
@@ -69,9 +68,9 @@ void Engine::Update(const float& delta) {
   this->DebugInfo();
 }
 
-void Engine::LoadEnvironmentBuffer() {
-  for (auto el : this->env_buffer) {
-    this->env_to_render->UpdateRoot(el);
+void Engine::KDTreeLoad() {
+  for (auto el : this->voxel_buffer) {
+    this->kdtree->UpdateRoot(el);
   }
 }
 
@@ -97,18 +96,18 @@ void Engine::FindVoxelsInView(const float& delta) {
 
   /*for (int voxel = 0; voxel < this->max_voxels_in_view; ++voxel) {*/
   /*}*/
-  this->TEMP_RENDER_BUFFER = this->env_to_render->FindNodesInRange(
-      this->AgentInstance.camera.position,
-      CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE);
+  /* Can be removed */
 }
 
 void Engine::DetectCollision(const float& delta) {
   /* Return the first collision */
+  this->kdtree->FindVoxelsInRange(this->AgentInstance.camera.position,
+                                  CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE);
+
   this->collision_where = -1;
-  // for (int i = 0; i < this->max_voxels_in_view; ++i) {
-  for (int i = 0; i < this->TEMP_RENDER_BUFFER.size(); ++i) {
+  for (int i = 0; i < this->kdtree->voxels_to_render.size(); ++i) {
     if (Environment::IsInsideAABB(this->AgentInstance.cursor,
-                                  this->TEMP_RENDER_BUFFER[i])) {
+                                  this->kdtree->voxels_to_render[i])) {
       this->collision_where = i;
       return;
     }
@@ -118,19 +117,19 @@ void Engine::DetectCollision(const float& delta) {
 
 void Engine::RenderVoxels(const float& delta) {
   for (int i = 0; i < this->max_voxels_in_view; i++) {
-    if (!Environment::IsBlank(this->TEMP_RENDER_BUFFER[i]->data.color)) {
-      DrawCube(this->TEMP_RENDER_BUFFER[i]->data.position,
-               this->TEMP_RENDER_BUFFER[i]->data.length,
-               this->TEMP_RENDER_BUFFER[i]->data.length,
-               this->TEMP_RENDER_BUFFER[i]->data.length,
-               this->TEMP_RENDER_BUFFER[i]->data.color);
+    if (!Environment::IsBlank(this->kdtree->voxels_to_render[i]->data.color)) {
+      DrawCube(this->kdtree->voxels_to_render[i]->data.position,
+               this->kdtree->voxels_to_render[i]->data.length,
+               this->kdtree->voxels_to_render[i]->data.length,
+               this->kdtree->voxels_to_render[i]->data.length,
+               this->kdtree->voxels_to_render[i]->data.color);
     }
     if (this->collision_where != -1) {
       int j = this->collision_where;
-      DrawCubeWires(this->TEMP_RENDER_BUFFER[j]->data.position,
-                    this->TEMP_RENDER_BUFFER[j]->data.length,
-                    this->TEMP_RENDER_BUFFER[j]->data.length,
-                    this->TEMP_RENDER_BUFFER[j]->data.length, BLACK);
+      DrawCubeWires(this->kdtree->voxels_to_render[j]->data.position,
+                    this->kdtree->voxels_to_render[j]->data.length,
+                    this->kdtree->voxels_to_render[j]->data.length,
+                    this->kdtree->voxels_to_render[j]->data.length, BLACK);
     }
   }
 }
@@ -142,8 +141,8 @@ void Engine::ModifyEnvironment(const float& delta) {
     case EnvironmentState::TRY_TO_DESTROY: {
       std::cout << "[INFO] Destroyed block" << std::endl;
       std::shared_ptr<VoxelNode> voxel_to_destroy =
-          this->TEMP_RENDER_BUFFER[this->collision_where];
-      this->TEMP_RENDER_BUFFER[this->collision_where] =
+          this->kdtree->voxels_to_render[this->collision_where];
+      this->kdtree->voxels_to_render[this->collision_where] =
           std::make_shared<VoxelNode>(Environment::ConstructVoxel(
               voxel_to_destroy->data.position, voxel_to_destroy->data.length));
       break;
@@ -161,9 +160,9 @@ void Engine::ModifyEnvironment(const float& delta) {
 void Engine::DebugInfo() {
   printf("[Current FPS]: fps=%d\n", GetFPS());
   printf("[Buffer size]: temp_buffer_size=%lu\n",
-         sizeof this->TEMP_RENDER_BUFFER);
+         sizeof this->kdtree->voxels_to_render);
   printf("[VoxelNode size]: VoxelNode=%lu\n",
-         sizeof this->TEMP_RENDER_BUFFER[0]);
+         sizeof this->kdtree->voxels_to_render[0]);
   printf("[Camera position]: x=%f y=%f z=%f\n",
          this->AgentInstance.camera.position.x,
          this->AgentInstance.camera.position.y,

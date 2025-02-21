@@ -10,7 +10,7 @@
 #include "kdtree.hpp"
 using PositionVectors = std::tuple<double, double, double>;
 using Voxel = EnvironmentObject;
-using VoxelNode = EnvironmentNode<EnvironmentObject>;
+using VoxelNode = EnvironmentNode<Voxel>;
 
 class Engine {
  public:
@@ -22,12 +22,10 @@ class Engine {
   double gravity;
 
   /* This one holds all generated voxels in the memory */
-  mutable std::vector<std::shared_ptr<VoxelNode>> env_buffer;
-  /* This one is temporary */
-  mutable std::vector<std::shared_ptr<VoxelNode>> TEMP_RENDER_BUFFER;
+  mutable std::vector<std::shared_ptr<VoxelNode>> voxel_buffer;
 
   /* This one is an interface for voxels */
-  std::unique_ptr<KDTree> env_to_render;
+  std::unique_ptr<KDTree> kdtree;
   mutable EnvironmentState recent_env_state;
 
   /* TODO: SHOULD REFACTOR TO VOXEL NODE??? */
@@ -38,7 +36,7 @@ class Engine {
   void Update(const float& delta);
   void DetectCollision(const float& delta);
   void ModifyEnvironment(const float& delta);
-  void LoadEnvironmentBuffer();
+  void KDTreeLoad();
   PositionVectors VoxelPositionVectors(const float& delta, Voxel voxel) const;
   double VoxelDistanceVector(PositionVectors vector) const;
   void DebugInfo();

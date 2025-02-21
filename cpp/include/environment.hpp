@@ -2,15 +2,17 @@
 #include <math.h>
 #include <raylib.h>
 
+#include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include "resource_manager.hpp"
 struct EnvironmentObject;
 template <typename EnvoObj>
 struct EnvironmentNode;
-using VoxelNode = EnvironmentNode<EnvironmentObject>;
 using Voxel = EnvironmentObject;
+using VoxelNode = EnvironmentNode<Voxel>;
 #define MAX_OBJECTS_IN_AREA 1 << 18
 #define CHUNK_SIZE 16
 #define MAX_ROW 3
@@ -39,6 +41,26 @@ struct EnvironmentNode {
   std::shared_ptr<EnvironmentNode> left = nullptr;
   std::shared_ptr<EnvironmentNode> right = nullptr;
   EnvironmentNode(EnvObj data) : data(data) {}
+  float GetDimValue(const int& what_dim) {
+    float dim_value = 0;
+    switch (what_dim) {
+      case 0:
+        dim_value = this->data.position.x;
+        break;
+      case 1:
+        dim_value = this->data.position.y;
+        break;
+      case 2:
+        dim_value = this->data.position.z;
+        break;
+      default:
+        std::cerr << "[ERROR] User has given " << what_dim << " as a parameter."
+                  << std::endl;
+        throw std::invalid_argument("[ERROR] This dimension doesn't exist");
+        break;
+    }
+    return dim_value;
+  }
 };
 
 class Environment {
