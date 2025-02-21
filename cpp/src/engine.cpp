@@ -56,7 +56,6 @@ void Engine::ProcessInput(const float& delta) {
 void Engine::Update(const float& delta) {
   /* Keep in mind, that the processing the input should be first */
   this->ProcessInput(delta);
-  this->FindVoxelsInView(delta);
   this->DetectCollision(delta);
   /* this->collision_where is updated after DetectCollision(...) */
   if (this->collision_where != -1 &&
