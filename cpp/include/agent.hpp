@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <memory>
 
 #include "environment.hpp"
 #include "raylib.h"
@@ -37,12 +38,9 @@ class Agent {
   Agent();
   // Agent(params);
   void AgentUpdate(EnvironmentState state);
-
-  EnvironmentObject cursor;
+  std::unique_ptr<VoxelNode> cursor;
   int cameraMode;
-  std::shared_ptr<Camera> camera;
-  std::shared_ptr<Camera> CameraInit();
+  Camera camera;
+  Camera CameraInit();
   void CameraChangeProjection();
-
- private:
 };

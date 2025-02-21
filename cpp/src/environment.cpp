@@ -44,28 +44,31 @@ bool Environment::IsBlank(Color color) {
   return color.a == 0 && color.b == 0 && color.g == 0 && color.r == 0;
 }
 
-bool Environment::IsInsideAABB(const Voxel& cursor, const Voxel& voxel) {
+bool Environment::IsInsideAABB(const std::unique_ptr<VoxelNode>& cursor,
+                               const std::shared_ptr<VoxelNode>& voxel) {
   /* If the cursor is small enough it behaves as if point */
-  return ((cursor.position.x + CURSOR_LENGTH) >=
-              (voxel.position.x - EDGE_LENGTH / 2) &&
-          cursor.position.x <= (voxel.position.x + EDGE_LENGTH / 2) &&
-          (cursor.position.y + CURSOR_LENGTH) >=
-              (voxel.position.y - EDGE_LENGTH / 2) &&
-          cursor.position.y <= (voxel.position.y + EDGE_LENGTH / 2) &&
-          (cursor.position.z + CURSOR_LENGTH) >=
-              (voxel.position.z - EDGE_LENGTH / 2) &&
-          cursor.position.z <= (voxel.position.z + EDGE_LENGTH / 2) &&
-          voxel.BLOCK == BLOCKING_ID::YES);
+  return (
+      (cursor->data.position.x + CURSOR_LENGTH) >=
+          (voxel->data.position.x - EDGE_LENGTH / 2) &&
+      cursor->data.position.x <= (voxel->data.position.x + EDGE_LENGTH / 2) &&
+      (cursor->data.position.y + CURSOR_LENGTH) >=
+          (voxel->data.position.y - EDGE_LENGTH / 2) &&
+      cursor->data.position.y <= (voxel->data.position.y + EDGE_LENGTH / 2) &&
+      (cursor->data.position.z + CURSOR_LENGTH) >=
+          (voxel->data.position.z - EDGE_LENGTH / 2) &&
+      cursor->data.position.z <= (voxel->data.position.z + EDGE_LENGTH / 2) &&
+      voxel->data.BLOCK == BLOCKING_ID::YES);
 }
 
-Voxel Environment::ConstructVoxel(Vector3 position, float length) {
+VoxelNode Environment::ConstructVoxel(Vector3 position, float length) {
   Voxel voxel(BLOCKING_ID::NO, IS_AGENT_IDENTIFIER::YES, length, position, RED);
-  return voxel;
+  return VoxelNode(voxel);
 }
 
-Voxel Environment::ConstructVoxel(BLOCKING_ID does_block,
-                                  IS_AGENT_IDENTIFIER is_agent, float length,
-                                  Vector3 position, Color color) {
+VoxelNode Environment::ConstructVoxel(BLOCKING_ID does_block,
+                                      IS_AGENT_IDENTIFIER is_agent,
+                                      float length, Vector3 position,
+                                      Color color) {
   Voxel voxel_custom(does_block, is_agent, length, position, color);
-  return voxel_custom;
+  return VoxelNode(voxel_custom);
 }

@@ -5,9 +5,12 @@
 #include <memory>
 #include <vector>
 
-#include "engine.hpp"
 #include "resource_manager.hpp"
-
+struct EnvironmentObject;
+template <typename EnvoObj>
+struct EnvironmentNode;
+using VoxelNode = EnvironmentNode<EnvironmentObject>;
+using Voxel = EnvironmentObject;
 #define MAX_OBJECTS_IN_AREA 1 << 18
 #define CHUNK_SIZE 16
 #define MAX_ROW 3
@@ -41,16 +44,15 @@ struct EnvironmentNode {
 class Environment {
  public:
   static std::vector<std::shared_ptr<VoxelNode>> CreateDefaultEnvironment();
-  static bool IsInsideAABB(const EnvironmentObject& cursor,
-                           const EnvironmentObject& voxel);
+  static bool IsInsideAABB(const std::unique_ptr<VoxelNode>& cursor,
+                           const std::shared_ptr<VoxelNode>& voxel);
   static bool IsBlank(Color color);
 
   /* Constructors for Voxels */
-  static EnvironmentObject ConstructVoxel(Vector3 position, float length);
-  static EnvironmentObject ConstructVoxel(BLOCKING_ID does_block,
-                                          IS_AGENT_IDENTIFIER is_agent,
-                                          float length, Vector3 position,
-                                          Color color);
+  static VoxelNode ConstructVoxel(Vector3 position, float length);
+  static VoxelNode ConstructVoxel(BLOCKING_ID does_block,
+                                  IS_AGENT_IDENTIFIER is_agent, float length,
+                                  Vector3 position, Color color);
 
  private:
   Environment() = delete;
