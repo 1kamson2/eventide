@@ -2,7 +2,7 @@
 Engine::Engine() {
   this->width = 1280;
   this->height = 960;
-  this->fps = 144;
+  this->fps = 1000;
   this->gravity = 9.80f;
   this->max_voxels_in_view = (int)(CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
                                    CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
@@ -160,6 +160,10 @@ void Engine::ModifyEnvironment(const float& delta) {
 
 void Engine::DebugInfo() {
   printf("[Current FPS]: fps=%d\n", GetFPS());
+  printf("[Buffer size]: temp_buffer_size=%lu\n",
+         sizeof this->TEMP_RENDER_BUFFER);
+  printf("[VoxelNode size]: VoxelNode=%lu\n",
+         sizeof this->TEMP_RENDER_BUFFER[0]);
   printf("[Camera position]: x=%f y=%f z=%f\n",
          this->AgentInstance.camera.position.x,
          this->AgentInstance.camera.position.y,
