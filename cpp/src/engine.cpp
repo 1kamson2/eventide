@@ -1,21 +1,25 @@
 #include "engine.hpp"
+
+#include <raylib.h>
+
+#include "environment.hpp"
 Engine::Engine() {
   this->width = 1280;
   this->height = 960;
   this->fps = 1000;
   this->gravity = 9.80f;
-  this->max_voxels_in_view = (int)(CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
-                                   CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
-                                   CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE);
-
+  this->render_distance = (int)(RENDER_DISTANCE);
+  this->tickrate = 0;
   this->AgentInstance = Agent();
-  this->voxel_buffer = Environment::CreateDefaultEnvironment();
+  /* Load the buffer with voxels */
+  Environment::GenerateWorld(this->voxel_buffer);
   /* Initialize KDTree */
   this->kdtree = std::make_unique<KDTree>();
   this->KDTreeLoad();
 
   this->collision_where = -1;
   this->recent_env_state = EnvironmentState::IDLE;
+  this->DebugInfo();
 }
 
 void Engine::ProcessInput(const float& delta) {
@@ -65,6 +69,7 @@ void Engine::Update(const float& delta) {
   }
   this->RenderVoxels(delta);
   this->DebugInfo();
+  tickrate = 0;
 }
 
 void Engine::KDTreeLoad() {
@@ -78,8 +83,8 @@ void Engine::FindVoxelsInView(const float& delta) {
    * finding the correct voxels */
   /* Probably I should start looking from the players position */
   /* If there are not sufficient voxels, put any. */
-  /* Should implement some structure that keeps those voxels sorted in relation
-   * to the agent */
+  /* Should implement some structure that keeps those voxels sorted in
+   * relation to the agent */
   // std::sort(this->env.begin(), this->env.end(),
   //           [&](Voxel v1, Voxel v2) { return this->VoxelHeuristic(v1, v2);
   //           });
@@ -101,9 +106,10 @@ void Engine::FindVoxelsInView(const float& delta) {
 void Engine::DetectCollision(const float& delta) {
   /* Return the first collision */
   this->kdtree->FindVoxelsInRange(this->AgentInstance.camera.position,
-                                  CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE);
+                                  this->render_distance);
 
   this->collision_where = -1;
+  /* Should use the function inside kdtree */
   for (int i = 0; i < this->kdtree->voxels_to_render.size(); ++i) {
     if (Environment::IsInsideAABB(this->AgentInstance.cursor,
                                   this->kdtree->voxels_to_render[i])) {
@@ -115,7 +121,7 @@ void Engine::DetectCollision(const float& delta) {
 }
 
 void Engine::RenderVoxels(const float& delta) {
-  for (int i = 0; i < this->max_voxels_in_view; i++) {
+  for (int i = 0; i < this->kdtree->voxels_to_render.size(); i++) {
     if (!Environment::IsBlank(this->kdtree->voxels_to_render[i]->data.color)) {
       DrawCube(this->kdtree->voxels_to_render[i]->data.position,
                this->kdtree->voxels_to_render[i]->data.length,
@@ -158,8 +164,10 @@ void Engine::ModifyEnvironment(const float& delta) {
 
 void Engine::DebugInfo() {
   printf("[Current FPS]: fps=%d\n", GetFPS());
-  printf("[Buffer size]: temp_buffer_size=%lu\n",
-         sizeof this->kdtree->voxels_to_render);
+  printf("[Render Distance]: render_distance=%d\n", this->render_distance);
+  printf("[Voxels Loaded]: voxel_buffer=%lu\n", this->voxel_buffer.size());
+  printf("[Buffer size]: voxels_to_render=%lu\n",
+         this->kdtree->voxels_to_render.size());
   printf("[VoxelNode size]: VoxelNode=%lu\n",
          sizeof this->kdtree->voxels_to_render[0]);
   printf("[Camera position]: x=%f y=%f z=%f\n",
@@ -178,3 +186,5 @@ void Engine::DebugInfo() {
   }
   printf("Mouse delta: x=%f y=%f\n", GetMouseDelta().x, GetMouseDelta().y);
 }
+
+Engine::~Engine() {}

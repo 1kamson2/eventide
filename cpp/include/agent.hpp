@@ -16,9 +16,6 @@
 #define CAMERA_DEFAULT_X_FACTOR 0.1f
 #define CAMERA_DEFAULT_ROTATE_FACTOR 0.05f
 #define CAMERA_DEFAULT_MAX_SPEED 1.0f
-/* The unit is chunk */
-#define CAMERA_DEFAULT_RENDER_DISTANCE 1.0f
-#define CAMERA_DEFAULT_RENDER_DEPTH 0.5f
 
 enum class EnvironmentState {
   MOVE_X_NORTH = 0,

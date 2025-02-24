@@ -1,12 +1,14 @@
 #pragma once
 #include <math.h>
 #include <raylib.h>
+#include <raymath.h>
 
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <vector>
 
+#include "SimplexNoise.h"
 #include "resource_manager.hpp"
 struct EnvironmentObject;
 template <typename EnvoObj>
@@ -15,8 +17,9 @@ using Voxel = EnvironmentObject;
 using VoxelNode = EnvironmentNode<Voxel>;
 #define MAX_OBJECTS_IN_AREA 1 << 18
 #define CHUNK_SIZE 16
-#define MAX_ROW 3
-#define MAX_ROW_LEVEL 3
+#define TICKRATE 20
+/* RENDER_DISTANCE unit: chunks */
+#define RENDER_DISTANCE 16
 #define EDGE_LENGTH 1.0f
 #define CURSOR_LENGTH 0.1f
 
@@ -65,10 +68,12 @@ struct EnvironmentNode {
 
 class Environment {
  public:
-  static std::vector<std::shared_ptr<VoxelNode>> CreateDefaultEnvironment();
+  static void GenerateWorld(
+      std::vector<std::shared_ptr<VoxelNode>>& voxel_buffer);
   static bool IsInsideAABB(const std::unique_ptr<VoxelNode>& cursor,
                            const std::shared_ptr<VoxelNode>& voxel);
   static bool IsBlank(Color color);
+  static float PerlinNoise(const float& x, const float& y);
 
   /* Constructors for Voxels */
   static VoxelNode ConstructVoxel(Vector3 position, float length);

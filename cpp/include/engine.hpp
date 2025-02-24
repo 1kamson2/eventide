@@ -2,6 +2,7 @@
 #include <math.h>
 #include <raylib.h>
 
+#include <memory>
 #include <tuple>
 #include <vector>
 
@@ -18,7 +19,9 @@ class Engine {
   // Engine(params);
   Agent AgentInstance;
   int width, height, fps, collision_where;
-  int max_voxels_in_view;
+  int render_distance;
+  Mesh cube_mesh;
+  unsigned char tickrate;
   double gravity;
 
   /* This one holds all generated voxels in the memory */
@@ -40,4 +43,5 @@ class Engine {
   PositionVectors VoxelPositionVectors(const float& delta, Voxel voxel) const;
   double VoxelDistanceVector(PositionVectors vector) const;
   void DebugInfo();
+  ~Engine();
 };
