@@ -91,7 +91,7 @@ void KDTree::FindVoxelsInRange(const Vector3& position, const float& radius) {
    * everytime? */
   this->voxels_to_render.clear();
 
-  Voxel pos_into_voxel = Voxel(BLOCKING_ID::NO, IS_AGENT_IDENTIFIER::NO,
+  Voxel pos_into_voxel = Voxel(BLOCKING::NO, IS_AGENT_IDENTIFIER::NO,
                                EDGE_LENGTH, position, BLANK);
   std::shared_ptr<VoxelNode> voxel_node =
       std::make_shared<VoxelNode>(pos_into_voxel);

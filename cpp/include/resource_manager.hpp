@@ -4,9 +4,6 @@
 #include <cassert>
 #include <cmath>
 
-enum class GAMES_STATES { ACTIVE = 0, MENU = 1, DEBUGGING = 2, EXIT = -1 };
-enum class BLOCKING_ID { YES = 0, NO = 1 };
-enum class IS_AGENT_IDENTIFIER { YES = 0, NO = 1 };
 // enum class FACES;
 
 class ResourceManager {
