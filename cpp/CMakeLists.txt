@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 project(eventide-engine)
-
 find_package(glfw3 3.3 REQUIRED)
 find_package(raylib 3.0 REQUIRED)
 #add_subdirectory(~/usr/include/GLFW/ SYSTEM)

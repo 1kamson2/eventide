@@ -2,23 +2,24 @@
 
 #include <raylib.h>
 
-#include "agent.hpp"
 #include "environment.hpp"
-
 Engine::Engine() {
   this->width = 1280;
   this->height = 960;
-  this->fps = 144;
+  this->fps = 1000;
   this->gravity = 9.80f;
-  this->max_voxels_in_view =
-      (int)(2 * CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
-            CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE *
-            CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE);
-  this->env = Environment::CreateDefaultEnvironment();
-  this->env_render_buffer = this->LoadEnvironmentBuffer();
+  this->render_distance = (int)(RENDER_DISTANCE);
+  this->tickrate = 0;
   this->AgentInstance = Agent();
+  /* Load the buffer with voxels */
+  Environment::GenerateWorld(this->voxel_buffer);
+  /* Initialize KDTree */
+  this->kdtree = std::make_unique<KDTree>();
+  this->KDTreeLoad();
+
   this->collision_where = -1;
   this->recent_env_state = EnvironmentState::IDLE;
+  this->DebugInfo();
 }
 
 void Engine::ProcessInput(const float& delta) {
@@ -59,7 +60,6 @@ void Engine::ProcessInput(const float& delta) {
 void Engine::Update(const float& delta) {
   /* Keep in mind, that the processing the input should be first */
   this->ProcessInput(delta);
-  this->FindVoxelsInView(delta);
   this->DetectCollision(delta);
   /* this->collision_where is updated after DetectCollision(...) */
   if (this->collision_where != -1 &&
@@ -69,29 +69,50 @@ void Engine::Update(const float& delta) {
   }
   this->RenderVoxels(delta);
   this->DebugInfo();
+  tickrate = 0;
+}
+
+void Engine::KDTreeLoad() {
+  for (auto el : this->voxel_buffer) {
+    this->kdtree->UpdateRoot(el);
+  }
 }
 
 void Engine::FindVoxelsInView(const float& delta) {
   /* TODO: Bug where if we leave an area it crashes, also there are bugs in
    * finding the correct voxels */
   /* Probably I should start looking from the players position */
-  int currently_found = 0;
-  for (int voxel = 0; voxel < MAX_OBJECTS_IN_AREA &&
-                      currently_found < this->max_voxels_in_view;
-       ++voxel) {
-    if (this->IsVoxelInView(delta, voxel)) {
-      this->env_render_buffer[currently_found] = this->env[voxel];
-      ++currently_found;
-    }
-  }
+  /* If there are not sufficient voxels, put any. */
+  /* Should implement some structure that keeps those voxels sorted in
+   * relation to the agent */
+  // std::sort(this->env.begin(), this->env.end(),
+  //           [&](Voxel v1, Voxel v2) { return this->VoxelHeuristic(v1, v2);
+  //           });
+  //
+  //
+  //
+  //
+  //
+  /*  This one is used for rendering */
+  // this->env.FindNodesInRange(this->AgentInstance.camera->position,
+  //                              CAMERA_DEFAULT_RENDER_DISTANCE *
+  //                              CHUNK_SIZE);
+
+  /*for (int voxel = 0; voxel < this->max_voxels_in_view; ++voxel) {*/
+  /*}*/
+  /* Can be removed */
 }
 
 void Engine::DetectCollision(const float& delta) {
   /* Return the first collision */
+  this->kdtree->FindVoxelsInRange(this->AgentInstance.camera.position,
+                                  this->render_distance);
+
   this->collision_where = -1;
-  for (int i = 0; i < this->max_voxels_in_view; ++i) {
+  /* Should use the function inside kdtree */
+  for (int i = 0; i < this->kdtree->voxels_to_render.size(); ++i) {
     if (Environment::IsInsideAABB(this->AgentInstance.cursor,
-                                  this->env_render_buffer[i])) {
+                                  this->kdtree->voxels_to_render[i])) {
       this->collision_where = i;
       return;
     }
@@ -100,34 +121,22 @@ void Engine::DetectCollision(const float& delta) {
 }
 
 void Engine::RenderVoxels(const float& delta) {
-  for (int i = 0; i < this->max_voxels_in_view; i++) {
-    if (!Environment::IsBlank(this->env_render_buffer[i].color)) {
-      DrawCube(
-          this->env_render_buffer[i].position,
-          this->env_render_buffer[i].length, this->env_render_buffer[i].length,
-          this->env_render_buffer[i].length, this->env_render_buffer[i].color);
+  for (int i = 0; i < this->kdtree->voxels_to_render.size(); i++) {
+    if (!Environment::IsBlank(this->kdtree->voxels_to_render[i]->data.color)) {
+      DrawCube(this->kdtree->voxels_to_render[i]->data.position,
+               this->kdtree->voxels_to_render[i]->data.length,
+               this->kdtree->voxels_to_render[i]->data.length,
+               this->kdtree->voxels_to_render[i]->data.length,
+               this->kdtree->voxels_to_render[i]->data.color);
     }
     if (this->collision_where != -1) {
       int j = this->collision_where;
-      DrawCubeWires(this->env_render_buffer[j].position,
-                    this->env_render_buffer[j].length,
-                    this->env_render_buffer[j].length,
-                    this->env_render_buffer[j].length, BLACK);
+      DrawCubeWires(this->kdtree->voxels_to_render[j]->data.position,
+                    this->kdtree->voxels_to_render[j]->data.length,
+                    this->kdtree->voxels_to_render[j]->data.length,
+                    this->kdtree->voxels_to_render[j]->data.length, BLACK);
     }
   }
-}
-
-bool Engine::IsVoxelInView(const float& delta, const int& which_voxel) const {
-  EnvironmentObject voxel = this->env[which_voxel];
-  double delta_x_vector =
-      std::abs(voxel.position.x - this->AgentInstance.camera.position.x);
-  double delta_y_vector =
-      std::abs(voxel.position.y - this->AgentInstance.camera.position.y);
-  double delta_z_vector =
-      std::abs(voxel.position.z - this->AgentInstance.camera.position.z);
-  return (delta_x_vector < CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE &&
-          delta_y_vector < CAMERA_DEFAULT_RENDER_DEPTH * CHUNK_SIZE &&
-          delta_z_vector < CAMERA_DEFAULT_RENDER_DISTANCE * CHUNK_SIZE);
 }
 
 void Engine::ModifyEnvironment(const float& delta) {
@@ -136,11 +145,11 @@ void Engine::ModifyEnvironment(const float& delta) {
   switch (this->recent_env_state) {
     case EnvironmentState::TRY_TO_DESTROY: {
       std::cout << "[INFO] Destroyed block" << std::endl;
-      EnvironmentObject voxel_to_destroy =
-          this->env_render_buffer[this->collision_where];
-      this->env_render_buffer[this->collision_where] =
-          Environment::ConstructVoxel(voxel_to_destroy.position,
-                                      voxel_to_destroy.length);
+      std::shared_ptr<VoxelNode> voxel_to_destroy =
+          this->kdtree->voxels_to_render[this->collision_where];
+      this->kdtree->voxels_to_render[this->collision_where] =
+          std::make_shared<VoxelNode>(Environment::ConstructVoxel(
+              voxel_to_destroy->data.position, voxel_to_destroy->data.length));
       break;
     }
     case EnvironmentState::TRY_TO_CREATE:
@@ -153,16 +162,14 @@ void Engine::ModifyEnvironment(const float& delta) {
   }
 }
 
-std::vector<EnvironmentObject> Engine::LoadEnvironmentBuffer() {
-  std::vector<EnvironmentObject> buffer;
-  for (int voxel = 0; voxel < this->max_voxels_in_view; ++voxel) {
-    buffer.push_back(this->env[voxel]);
-  }
-  return buffer;
-}
-
 void Engine::DebugInfo() {
   printf("[Current FPS]: fps=%d\n", GetFPS());
+  printf("[Render Distance]: render_distance=%d\n", this->render_distance);
+  printf("[Voxels Loaded]: voxel_buffer=%lu\n", this->voxel_buffer.size());
+  printf("[Buffer size]: voxels_to_render=%lu\n",
+         this->kdtree->voxels_to_render.size());
+  printf("[VoxelNode size]: VoxelNode=%lu\n",
+         sizeof this->kdtree->voxels_to_render[0]);
   printf("[Camera position]: x=%f y=%f z=%f\n",
          this->AgentInstance.camera.position.x,
          this->AgentInstance.camera.position.y,
@@ -171,11 +178,13 @@ void Engine::DebugInfo() {
       "[Camera target]: x=%f y=%f z=%f\n", this->AgentInstance.camera.target.x,
       this->AgentInstance.camera.target.y, this->AgentInstance.camera.target.z);
   printf("[Cursor position]: x=%f y=%f z=%f\n",
-         this->AgentInstance.cursor.position.x,
-         this->AgentInstance.cursor.position.y,
-         this->AgentInstance.cursor.position.z);
+         this->AgentInstance.cursor->data.position.x,
+         this->AgentInstance.cursor->data.position.y,
+         this->AgentInstance.cursor->data.position.z);
   if (this->collision_where != -1) {
     printf("Cursor and object collision on: %d\n", this->collision_where);
   }
   printf("Mouse delta: x=%f y=%f\n", GetMouseDelta().x, GetMouseDelta().y);
 }
+
+Engine::~Engine() {}
