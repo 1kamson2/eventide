@@ -6,9 +6,6 @@
 #include <vector>
 
 #include "environment.hpp"
-using PositionVectors = std::tuple<double, double, double>;
-using Voxel = EnvironmentObject;
-using VoxelNode = EnvironmentNode<Voxel>;
 
 class KDTree {
  public:

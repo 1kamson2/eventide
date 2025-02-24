@@ -9,9 +9,6 @@
 #include "agent.hpp"
 #include "environment.hpp"
 #include "kdtree.hpp"
-using PositionVectors = std::tuple<double, double, double>;
-using Voxel = EnvironmentObject;
-using VoxelNode = EnvironmentNode<Voxel>;
 
 class Engine {
  public:
