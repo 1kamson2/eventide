@@ -1,7 +1,4 @@
 #include "Globals.hpp"
-enum class GAMES_STATES { ACTIVE = 0, MENU = 1, DEBUGGING = 2, EXIT = -1 };
-enum class BLOCK_ID { YES = 0, NO = 1 };
-enum class AGENT_ID { YES = 0, NO = 1 };
 namespace camvars {
 const double CAMERA_DEFAULT_POSITION_X = 0.0f;
 const double CAMERA_DEFAULT_POSITION_Y = 2.0f;
@@ -25,4 +22,22 @@ const int TICKRATE = 20;
 const int RENDER_DISTANCE = 16;
 const double EDGE_LENGTH = 1.0f;
 const double CURSOR_LENGTH = 0.1f;
+
+const int RED_COLOR_MASK = 0xFF000000;
+const int GREEN_COLOR_MASK = 0x00FF0000;
+const int BLUE_COLOR_MASK = 0x0000FF00;
+const int ALPHA = 0x000000FF;
+const int Z_COORD_MASK = 0x3FF;
+const int Y_COORD_MASK = 0xFCC00;
+const int X_COORD_MASK = 0x3FF00000;
 }  // namespace engvars
+namespace octree {
+const uint32_t BOTTOM_LEFT_FRONT = 0;
+const uint32_t BOTTOM_RIGHT_FRONT = 1;
+const uint32_t BOTTOM_LEFT_BACK = 2;
+const uint32_t BOTTOM_RIGHT_BACK = 3;
+const uint32_t TOP_LEFT_FRONT = 4;
+const uint32_t TOP_RIGHT_FRONT = 5;
+const uint32_t TOP_LEFT_BACK = 6;
+const uint32_t TOP_RIGHT_BACK = 7;
+}  // namespace octree

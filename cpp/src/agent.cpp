@@ -1,8 +1,12 @@
 #include "agent.hpp"
 
 #include <raylib.h>
+using namespace camvars;
 
 #include "environment.hpp"
+Cursor::Cursor(BLOCK_ID block, AGENT_ID agent, const uint& color,
+               const Vector3& position)
+    : ObjectData(block, agent, color), position{position} {}
 
 Agent::Agent() {
   this->x = CAMERA_DEFAULT_POSITION_X;
@@ -15,8 +19,8 @@ Agent::Agent() {
   this->rotate_speed = CAMERA_DEFAULT_ROTATE_FACTOR;
   this->cameraMode = CAMERA_DEFAULT_MODE;
   this->camera = this->CameraInit();
-  this->cursor = std::make_unique<VoxelNode>(
-      Environment::ConstructVoxel(this->camera.target, CURSOR_LENGTH));
+  this->cursor =
+      Cursor(BLOCK_ID::NO, AGENT_ID::NO, 0x00FF0000, (Vector3){0, 0, 0});
 }
 
 Camera Agent::CameraInit() {
@@ -68,7 +72,7 @@ void Agent::AgentUpdate(EnvironmentState state) {
   UpdateCameraPro(&this->camera, (Vector3){deltax, deltay, 0.0f},
                   (Vector3){deltavert, deltahoriz, 0.0f},
                   GetMouseWheelMove() * 0.0f);
-  this->cursor->data.position = this->camera.target;
+  this->cursor->position = this->camera.target;
 }
 
 void Agent::CameraChangeProjection() {

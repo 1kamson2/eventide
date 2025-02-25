@@ -1,6 +1,9 @@
-#include "engine.hpp"
+#include "Engine.hpp"
 
 #include <raylib.h>
+
+using namespace engvars;
+using namespace camvars;
 
 #include "environment.hpp"
 Engine::Engine() {
@@ -8,15 +11,11 @@ Engine::Engine() {
   this->height = 960;
   this->fps = 1000;
   this->gravity = 9.80f;
-  this->render_distance = (int)(RENDER_DISTANCE);
+  this->render_distance = RENDER_DISTANCE;
   this->tickrate = 0;
   this->AgentInstance = Agent();
   /* Load the buffer with voxels */
   Environment::GenerateWorld(this->voxel_buffer);
-  /* Initialize KDTree */
-  this->kdtree = std::make_unique<KDTree>();
-  this->KDTreeLoad();
-
   this->collision_where = -1;
   this->recent_env_state = EnvironmentState::IDLE;
   this->DebugInfo();
@@ -60,6 +59,7 @@ void Engine::ProcessInput(const float& delta) {
 void Engine::Update(const float& delta) {
   /* Keep in mind, that the processing the input should be first */
   this->ProcessInput(delta);
+  this->BufferLoad();
   this->DetectCollision(delta);
   /* this->collision_where is updated after DetectCollision(...) */
   if (this->collision_where != -1 &&
@@ -72,52 +72,29 @@ void Engine::Update(const float& delta) {
   tickrate = 0;
 }
 
-void Engine::KDTreeLoad() {
-  for (auto el : this->voxel_buffer) {
-    this->kdtree->UpdateRoot(el);
-  }
-}
-
-void Engine::FindVoxelsInView(const float& delta) {
-  /* TODO: Bug where if we leave an area it crashes, also there are bugs in
-   * finding the correct voxels */
-  /* Probably I should start looking from the players position */
-  /* If there are not sufficient voxels, put any. */
-  /* Should implement some structure that keeps those voxels sorted in
-   * relation to the agent */
-  // std::sort(this->env.begin(), this->env.end(),
-  //           [&](Voxel v1, Voxel v2) { return this->VoxelHeuristic(v1, v2);
-  //           });
-  //
-  //
-  //
-  //
-  //
-  /*  This one is used for rendering */
-  // this->env.FindNodesInRange(this->AgentInstance.camera->position,
-  //                              CAMERA_DEFAULT_RENDER_DISTANCE *
-  //                              CHUNK_SIZE);
-
-  /*for (int voxel = 0; voxel < this->max_voxels_in_view; ++voxel) {*/
-  /*}*/
-  /* Can be removed */
-}
-
 void Engine::DetectCollision(const float& delta) {
   /* Return the first collision */
-  this->kdtree->FindVoxelsInRange(this->AgentInstance.camera.position,
-                                  this->render_distance);
-
+  /* TODO: Find a way to load the voxels */
   this->collision_where = -1;
   /* Should use the function inside kdtree */
-  for (int i = 0; i < this->kdtree->voxels_to_render.size(); ++i) {
+  for (int i = 0; i < this->voxel_buffer_interact.size(); ++i) {
     if (Environment::IsInsideAABB(this->AgentInstance.cursor,
-                                  this->kdtree->voxels_to_render[i])) {
+                                  this->voxel_buffer_interact[i])) {
       this->collision_where = i;
       return;
     }
   }
   return;
+}
+
+void Engine::BufferLoad() {
+  this->voxel_buffer_interact.clear();
+
+  for (int i = 0; i < this->voxel_buffer.size(); ++i) {
+    if (this->voxel_buffer[i].ShouldRenderChunk(this->AgentInstance.cursor)) {
+      this->voxel_buffer_interact.push_back(this->voxel_buffer[i]);
+    }
+  }
 }
 
 void Engine::RenderVoxels(const float& delta) {

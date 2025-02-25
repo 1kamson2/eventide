@@ -2,9 +2,16 @@
 #include <iostream>
 #include <memory>
 
-#include "environment.hpp"
+#include "Voxels.hpp"
 #include "raylib.h"
 #include "rcamera.h"
+
+class Cursor : public ObjectData {
+ public:
+  Vector3 position;
+  Cursor(BLOCK_ID block, AGENT_ID agent, const uint& color,
+         const Vector3& position);
+};
 
 class Agent {
  public:
@@ -12,7 +19,7 @@ class Agent {
   Agent();
   // Agent(params);
   void AgentUpdate(EnvironmentState state);
-  std::unique_ptr<VoxelNode> cursor;
+  Cursor cursor;
   int cameraMode;
   Camera camera;
   Camera CameraInit();

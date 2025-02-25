@@ -8,24 +8,27 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Chunk.hpp"
 #include "SimplexNoise.h"
+#include "Voxels.hpp"
 #include "resource_manager.hpp"
 
 class Environment {
  public:
-  static void TestNoise(std::vector<std::shared_ptr<VoxelNode>>& voxel_buffer);
-  static void GenerateWorld(
-      std::vector<std::shared_ptr<VoxelNode>>& voxel_buffer);
-  static bool IsInsideAABB(const std::unique_ptr<VoxelNode>& cursor,
-                           const std::shared_ptr<VoxelNode>& voxel);
+  static void TestNoise(std::vector<Voxel<ObjectData>>& voxel_buffer);
+  static void GenerateWorld(std::vector<Chunk<ObjectData>>& voxel_buffer);
+  static Chunk<ObjectData> GenerateChunk(const int& id,
+                                         const Vector2& min_coords);
+  static bool IsInsideAABB(const Cursor& cursor,
+                           const std::unique_ptr<Voxel<ObjectData>>& voxel);
   static bool IsBlank(Color color);
   static float PerlinNoise(const float& x, const float& y);
 
   /* Constructors for Voxels */
-  static VoxelNode ConstructVoxel(Vector3 position, float length);
-  static VoxelNode ConstructVoxel(BLOCKING_ID does_block,
-                                  IS_AGENT_IDENTIFIER is_agent, float length,
-                                  Vector3 position, Color color);
+  static Voxel<ObjectData> ConstructVoxel(Vector3 position, float length);
+  static Voxel<ObjectData> ConstructVoxel(BLOCK_ID does_block,
+                                          AGENT_ID is_agent, float length,
+                                          Vector3 position, Color color);
 
  private:
   Environment() = delete;
