@@ -1,8 +1,8 @@
-#include "engine.hpp"
+#include "Engine.hpp"
 
 #include <raylib.h>
 
-#include "environment.hpp"
+#include "Environment.hpp"
 Engine::Engine() {
   this->width = 1280;
   this->height = 960;
@@ -13,9 +13,9 @@ Engine::Engine() {
   this->AgentInstance = Agent();
   /* Load the buffer with voxels */
   Environment::GenerateWorld(this->voxel_buffer);
-  /* Initialize KDTree */
-  this->kdtree = std::make_unique<KDTree>();
-  this->KDTreeLoad();
+  /* Initialize Chunk */
+  this->kdtree = std::make_unique<Chunk>();
+  this->ChunkLoad();
 
   this->collision_where = -1;
   this->recent_env_state = EnvironmentState::IDLE;
@@ -72,7 +72,7 @@ void Engine::Update(const float& delta) {
   tickrate = 0;
 }
 
-void Engine::KDTreeLoad() {
+void Engine::ChunkLoad() {
   for (auto el : this->voxel_buffer) {
     this->kdtree->UpdateRoot(el);
   }
@@ -145,10 +145,10 @@ void Engine::ModifyEnvironment(const float& delta) {
   switch (this->recent_env_state) {
     case EnvironmentState::TRY_TO_DESTROY: {
       std::cout << "[INFO] Destroyed block" << std::endl;
-      std::shared_ptr<VoxelNode> voxel_to_destroy =
+      std::shared_ptr<Voxel> voxel_to_destroy =
           this->kdtree->voxels_to_render[this->collision_where];
       this->kdtree->voxels_to_render[this->collision_where] =
-          std::make_shared<VoxelNode>(Environment::ConstructVoxel(
+          std::make_shared<Voxel>(Environment::ConstructVoxel(
               voxel_to_destroy->data.position, voxel_to_destroy->data.length));
       break;
     }
@@ -168,8 +168,7 @@ void Engine::DebugInfo() {
   printf("[Voxels Loaded]: voxel_buffer=%lu\n", this->voxel_buffer.size());
   printf("[Buffer size]: voxels_to_render=%lu\n",
          this->kdtree->voxels_to_render.size());
-  printf("[VoxelNode size]: VoxelNode=%lu\n",
-         sizeof this->kdtree->voxels_to_render[0]);
+  printf("[Voxel size]: Voxel=%lu\n", sizeof this->kdtree->voxels_to_render[0]);
   printf("[Camera position]: x=%f y=%f z=%f\n",
          this->AgentInstance.camera.position.x,
          this->AgentInstance.camera.position.y,

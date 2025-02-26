@@ -1,8 +1,8 @@
-#include "agent.hpp"
+#include "Agent.hpp"
 
 #include <raylib.h>
 
-#include "environment.hpp"
+#include "Environment.hpp"
 
 Agent::Agent() {
   this->x = CAMERA_DEFAULT_POSITION_X;
@@ -15,7 +15,7 @@ Agent::Agent() {
   this->rotate_speed = CAMERA_DEFAULT_ROTATE_FACTOR;
   this->cameraMode = CAMERA_DEFAULT_MODE;
   this->camera = this->CameraInit();
-  this->cursor = std::make_unique<VoxelNode>(
+  this->cursor = std::make_unique<Voxel>(
       Environment::ConstructVoxel(this->camera.target, CURSOR_LENGTH));
 }
 

@@ -6,12 +6,11 @@
 #include <tuple>
 #include <vector>
 
-#include "agent.hpp"
-#include "environment.hpp"
-#include "kdtree.hpp"
+#include "Agent.hpp"
+#include "Chunk.hpp"
+#include "Environment.hpp"
 using PositionVectors = std::tuple<double, double, double>;
-using Voxel = EnvironmentObject;
-using VoxelNode = EnvironmentNode<Voxel>;
+using Voxel = EnvironmentNode<ObjectInfo>;
 
 class Engine {
  public:
@@ -25,10 +24,10 @@ class Engine {
   double gravity;
 
   /* This one holds all generated voxels in the memory */
-  mutable std::vector<std::shared_ptr<VoxelNode>> voxel_buffer;
+  mutable std::vector<std::shared_ptr<Voxel>> voxel_buffer;
 
   /* This one is an interface for voxels */
-  std::unique_ptr<KDTree> kdtree;
+  std::unique_ptr<Chunk> kdtree;
   mutable EnvironmentState recent_env_state;
 
   /* TODO: SHOULD REFACTOR TO VOXEL NODE??? */
@@ -39,7 +38,7 @@ class Engine {
   void Update(const float& delta);
   void DetectCollision(const float& delta);
   void ModifyEnvironment(const float& delta);
-  void KDTreeLoad();
+  void ChunkLoad();
   PositionVectors VoxelPositionVectors(const float& delta, Voxel voxel) const;
   double VoxelDistanceVector(PositionVectors vector) const;
   void DebugInfo();

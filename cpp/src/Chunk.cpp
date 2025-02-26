@@ -1,23 +1,24 @@
+#include "Chunk.hpp"
+
 #include <memory>
 #include <stdexcept>
 
-#include "environment.hpp"
-#include "kdtree.hpp"
-#include "resource_manager.hpp"
-KDTree::KDTree()
+#include "Environment.hpp"
+#include "ResourceManager.hpp"
+Chunk::Chunk()
     : root(nullptr),
       best_voxel_cand(nullptr),
       best_distance_cand(0),
       rendered(0),
       voxels_to_render() {}
 
-std::shared_ptr<VoxelNode> KDTree::InsertVoxel(
-    std::shared_ptr<VoxelNode>& last_free_voxel,
-    std::shared_ptr<VoxelNode>& new_voxel, int depth) {
+std::shared_ptr<Voxel> Chunk::InsertVoxel(
+    std::shared_ptr<Voxel>& last_free_voxel, std::shared_ptr<Voxel>& new_voxel,
+    int depth) {
   /*
    * This function traverses recursively through the KD-Tree, while meeting the
    * conditions. This also divides the entire tree into left and right side. If
-   * we find the null value, we insert the VoxelNode, thus it is now ready to be
+   * we find the null value, we insert the Voxel, thus it is now ready to be
    * used.
    */
   if (!last_free_voxel) {
@@ -39,9 +40,9 @@ std::shared_ptr<VoxelNode> KDTree::InsertVoxel(
   return last_free_voxel;
 }
 
-bool KDTree::FindVoxel(const std::shared_ptr<VoxelNode>& current_voxel,
-                       const std::shared_ptr<VoxelNode>& voxel_to_find,
-                       int depth) const {
+bool Chunk::FindVoxel(const std::shared_ptr<Voxel>& current_voxel,
+                      const std::shared_ptr<Voxel>& voxel_to_find,
+                      int depth) const {
   /* This function returns if the voxels are the same */
   /* Probably should return the address where it is? */
   /* If not used, delete it */
@@ -62,8 +63,8 @@ bool KDTree::FindVoxel(const std::shared_ptr<VoxelNode>& current_voxel,
   }
 }
 
-std::shared_ptr<VoxelNode> KDTree::FindNearestVoxel(
-    const std::shared_ptr<VoxelNode> target) {
+std::shared_ptr<Voxel> Chunk::FindNearestVoxel(
+    const std::shared_ptr<Voxel> target) {
   if (!this->root) {
     return nullptr;
   }
@@ -76,7 +77,7 @@ std::shared_ptr<VoxelNode> KDTree::FindNearestVoxel(
   return this->best_voxel_cand;
 }
 
-void KDTree::FindVoxelsInRange(const Vector3& position, const float& radius) {
+void Chunk::FindVoxelsInRange(const Vector3& position, const float& radius) {
   /* This is the main function of this KD-Tree class. Here will be returned the
    * nearest Voxels in given range */
   if (!root) {
@@ -91,18 +92,17 @@ void KDTree::FindVoxelsInRange(const Vector3& position, const float& radius) {
    * everytime? */
   this->voxels_to_render.clear();
 
-  Voxel pos_into_voxel = Voxel(BLOCKING_ID::NO, IS_AGENT_IDENTIFIER::NO,
-                               EDGE_LENGTH, position, BLANK);
-  std::shared_ptr<VoxelNode> voxel_node =
-      std::make_shared<VoxelNode>(pos_into_voxel);
+  ObjectInfo pos_into_voxel =
+      ObjectInfo(BLOCK_ID::NO, AGENT_ID::NO, EDGE_LENGTH, position, BLANK);
+  std::shared_ptr<Voxel> voxel_node = std::make_shared<Voxel>(pos_into_voxel);
   LoadRenderBuffer(root, voxel_node, radius, 0);
   return;
 }
 
-void KDTree::SearchForNearestVoxel(std::shared_ptr<VoxelNode>& node,
-                                   const Vector3& target_pos, int depth,
-                                   std::shared_ptr<VoxelNode>& best_node,
-                                   double& best_distance) {
+void Chunk::SearchForNearestVoxel(std::shared_ptr<Voxel>& node,
+                                  const Vector3& target_pos, int depth,
+                                  std::shared_ptr<Voxel>& best_node,
+                                  double& best_distance) {
   if (!node) return;
 
   float current_distance = GetDistance(node->data.position, target_pos);
@@ -154,9 +154,9 @@ void KDTree::SearchForNearestVoxel(std::shared_ptr<VoxelNode>& node,
   }
 }
 
-void KDTree::LoadRenderBuffer(std::shared_ptr<VoxelNode>& voxel,
-                              std::shared_ptr<VoxelNode>& temp_voxel,
-                              float radius, int depth) {
+void Chunk::LoadRenderBuffer(std::shared_ptr<Voxel>& voxel,
+                             std::shared_ptr<Voxel>& temp_voxel, float radius,
+                             int depth) {
   if (!voxel) return;
 
   float dist = GetDistance(voxel->data.position, temp_voxel->data.position);
@@ -184,19 +184,19 @@ void KDTree::LoadRenderBuffer(std::shared_ptr<VoxelNode>& voxel,
   }
 }
 
-float KDTree::GetDistance(const Vector3& vec1, const Vector3& vec2) const {
+float Chunk::GetDistance(const Vector3& vec1, const Vector3& vec2) const {
   float dx = vec1.x - vec2.x;
   float dy = vec1.y - vec2.y;
   float dz = vec1.z - vec2.z;
   return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-inline bool KDTree::CompareVoxels(const Vector3& vec1,
-                                  const Vector3& vec2) const {
+inline bool Chunk::CompareVoxels(const Vector3& vec1,
+                                 const Vector3& vec2) const {
   return vec1.x == vec2.x && vec1.y == vec2.y && vec1.z == vec2.z;
 }
 
-void KDTree::UpdateRoot(std::shared_ptr<VoxelNode>& voxel) {
+void Chunk::UpdateRoot(std::shared_ptr<Voxel>& voxel) {
   /* Updating the tree, use only shared pointers */
   this->root = InsertVoxel(root, voxel, 0);
 }
