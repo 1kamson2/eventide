@@ -13,17 +13,20 @@ void Environment::GenerateWorld(
   int currently_rendered = 0;
   constexpr float f = 0.5f;
   constexpr float norm = 1.75f;
-  const float bound = CHUNK_SIZE * 3;
+  const float bound = CHUNK_SIZE * 8;
   for (float x = 0; x < bound; ++x) {
-    for (float y = 0; y < bound; ++y) {
-      float threshold = y / bound;
+    for (float y = 0; y < 3; ++y) {
+      float threshold = y / 3;
       for (float z = 0; z < bound; ++z) {
         float elevation =
             (SimplexNoise::noise(x, y, z) +
              f * SimplexNoise::noise(f * x, f * y, f * z) +
              f * f * SimplexNoise::noise(f * f * x, f * f * y, f * f * z)) /
             norm;
-        Color color = elevation >= threshold ? DARKGREEN : BLANK;
+        std::cout << elevation << std::endl;
+        Color color = ((elevation >= threshold || elevation <= -threshold))
+                          ? DARKGREEN
+                          : BLANK;
         voxel_buffer.push_back(std::make_shared<Voxel>(
             ObjectInfo(BLOCK_ID::YES, AGENT_ID::NO, EDGE_LENGTH,
                        (Vector3){x, -y, z}, color)));

@@ -15,7 +15,7 @@ const double CAMERA_DEFAULT_MAX_SPEED = 1.0f;
 
 namespace engvars {
 const int MAX_OBJECTS_IN_AREA = 1 << 18;
-const int CHUNK_SIZE = 16;
+const int CHUNK_SIZE = 32;
 const int TICKRATE = 20;
 
 /* RENDER_DISTANCE unit: chunks */
