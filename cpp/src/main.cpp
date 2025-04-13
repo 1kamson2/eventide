@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-#include "Engine.hpp"
+#include "Engine/Engine.hpp"
 
 int main() {
   Engine run{};
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(run.width, run.height, "Test");
-  SetTargetFPS(run.fps);
+  SetTargetFPS(1000);
   DisableCursor();
   float delta;
   while (!WindowShouldClose()) {
@@ -17,18 +17,16 @@ int main() {
 
     BeginDrawing();
     ClearBackground(BLUE);
-    BeginMode3D(run.AgentInstance.camera);
-    run.Update(delta);
-    /* TODO: Use meshing instead of drawing cubes. */
-    DrawCube(run.AgentInstance.cursor->data.position,
-             run.AgentInstance.cursor->data.length,
-             run.AgentInstance.cursor->data.length,
-             run.AgentInstance.cursor->data.length, GREEN);
+    BeginMode3D(run.agt.cam);
+    run.GameLoop(delta);
 
     EndMode3D();
+    DrawFPS(10, 10);
     EndDrawing();
   }
   CloseWindow();
 
   return 0;
 }
+
+// TODO: No colors, prob we lose somewhere our reference to the color.

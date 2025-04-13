@@ -1,0 +1,21 @@
+#pragma once
+#include <iostream>
+
+#include "Voxel/Voxel.hpp"
+class Chunk {
+ public:
+  std::shared_ptr<Voxel> root_voxel = nullptr;
+  Vector3 mid_point;
+
+  Chunk(const Vector3& mid_point);
+  void Update(std::shared_ptr<Voxel>& voxel);
+  float GetDistanceSquared(const std::shared_ptr<Voxel>& vox1,
+                           const std::shared_ptr<Voxel>& vox2);
+  float GetDistanceSquared(Vector3& vec1, Vector3& vec2);
+  Vector3 GetMidPoint() const;
+
+  bool InView(Vector3& agent_pos, const float& render_dist);
+  std::shared_ptr<Voxel> Insert(std::shared_ptr<Voxel>& last_free_voxel,
+                                std::shared_ptr<Voxel>& new_voxel, int depth);
+  friend bool operator==(const Voxel& lhs, const Voxel& rhs);
+};
