@@ -1,5 +1,7 @@
 #include "Chunk/Chunk.hpp"
 
+#include <cstddef>
+
 Chunk::Chunk(const Vector3& mid_point) : mid_point(mid_point) {
   std::cout << "[INFO] Chunk was created" << std::endl;
 }

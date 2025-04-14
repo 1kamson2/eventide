@@ -30,6 +30,6 @@ int main() {
 }
 
 // TODO: No colors, prob we lose somewhere our reference to the color.
-// TODO: Fix the terrain generation
-// TODO: Fix the rendering
 // TODO: Make rendering faster
+//        - BFS? DFS?
+//        - There is no need to render unseen voxels

@@ -10,6 +10,7 @@ class Renderer {
   int rendered_voxels = 0;
 
   Renderer();
-  void RenderVoxels(std::shared_ptr<Voxel>& voxel_to_render);
+
+  void RenderVoxels(const std::shared_ptr<Voxel>& voxel, float y);
   void TraverseChunks(std::vector<Chunk>& chunks_to_render);
 };

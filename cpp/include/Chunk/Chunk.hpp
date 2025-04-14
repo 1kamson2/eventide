@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 
 #include "Voxel/Voxel.hpp"
 class Chunk {
@@ -11,8 +12,11 @@ class Chunk {
   void Update(std::shared_ptr<Voxel>& voxel);
   float GetDistanceSquared(const std::shared_ptr<Voxel>& vox1,
                            const std::shared_ptr<Voxel>& vox2);
+
   float GetDistanceSquared(Vector3& vec1, Vector3& vec2);
   Vector3 GetMidPoint() const;
+
+  // std::shared_ptr<Voxel>& GetVoxelFromLayer(const float& y);
 
   bool InView(Vector3& agent_pos, const float& render_dist);
   std::shared_ptr<Voxel> Insert(std::shared_ptr<Voxel>& last_free_voxel,

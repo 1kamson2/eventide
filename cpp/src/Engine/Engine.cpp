@@ -2,6 +2,7 @@
 
 #include "Utils/Globals.hpp"
 
+using namespace cam_definitions;
 Engine::Engine() : env(), ren(), agt((Vector3){0, 2, 4}) {
   std::cout << "[INFO] Loading chunks." << std::endl;
   env.WorldInit(chunks);
@@ -39,7 +40,7 @@ void Engine::GetChunksToRender() {
   for (Chunk& chunk : chunks) {
     // TODO: HARDCODED VALUE
     // TODO: MORE INTELLIGENT APPROACH (EARLY)
-    if (!chunk.InView(agent_pos, 1 << 10)) {
+    if (!chunk.InView(agent_pos, DEFAULT_RENDER_DISTANCE)) {
       // TODO: CHECK IF ALWAYS CAN ESCAPE EARLY
       continue;
     }
