@@ -2,6 +2,8 @@
 
 #include <raylib.h>
 
+#include <cassert>
+#include <cmath>
 #include <cstdint>
 
 #include "Utils/Globals.hpp"
@@ -38,8 +40,8 @@ void Environment::ChunkRender(std::vector<Chunk>& chunks_to_render,
   for (float chunk_x = x; chunk_x < x + SIZE; ++chunk_x) {
     for (float chunk_y = y; chunk_y < y + SIZE; ++chunk_y) {
       for (float chunk_z = z; chunk_z < z + SIZE; ++chunk_z) {
-        float elevation = GetElevation(chunk_x, chunk_y, chunk_z, f, norm);
-        Color col = GetColor(elevation);
+        float elevation = GetElevation(chunk_x, chunk_y, chunk_z, norm, f);
+        Color col = AssignColor(elevation, chunk_y);
         Vector3 position_in_chunk = (Vector3){chunk_x, -chunk_y, chunk_z};
         std::shared_ptr<Voxel> vox_node =
             std::make_shared<Voxel>(position_in_chunk, col);
@@ -52,17 +54,39 @@ void Environment::ChunkRender(std::vector<Chunk>& chunks_to_render,
 
 float Environment::GetElevation(const float& x, const float& y, const float& z,
                                 const float& norm, const float& f) {
-  float nx = x / SIZE, ny = y / SIZE, nz = z / SIZE;
+  float nx = x / SIZE - 0.5, ny = y / SIZE - 0.5, nz = z / SIZE - 0.5;
   float fnx = f * nx, fny = f * ny, fnz = f * nz;
 
   float elevation =
       (f * SimplexNoise::noise(fnx, fny, fnz) +
-       0.5f * f * SimplexNoise::noise(2.0f * fnx, 2.0f * fny, 2.0f * fnz) +
-       0.25f * f * SimplexNoise::noise(4.0f * fnx, 4.0f * fny, 4.0f * fnz)) /
+       0.5f * f *
+           SimplexNoise::noise(2.0f * fnx - 4.312f, 2.0f * fny + 6.4312f,
+                               2.0f * fnz - 12.231f) +
+       0.25f * f *
+           SimplexNoise::noise(4.0f * fnx + 7.523f, 4.0f * fny - 9.1231f,
+                               4.0f * fnz + 8.538623f)) /
       norm;
-  return elevation;
+  /* Make sure, that we are in the correct range */
+  assert(elevation >= -1 && elevation <= 1);
+  return elevation >= 0 ? std::pow(elevation, 1.182f)
+                        : std::pow(-elevation, 1.182f);
 }
 
-Color Environment::AssignColor(const float& elevation) const {
-  return elevation >= 0.4 ? RED : BLANK;
+Color Environment::AssignColor(const float& elevation, const float& y) const {
+  if (elevation < 0.1 && y <= 2)
+    return BLANK;
+  else if (elevation < 0.1 && y > 2) {
+    return BLUE;
+  } else if (elevation < 0.2)
+    return YELLOW;
+  else if (elevation < 0.3)
+    return GREEN;
+  else if (elevation < 0.5)
+    return DARKGREEN;
+  else if (elevation < 0.7)
+    return GREEN;
+  else if (elevation < 0.9)
+    return YELLOW;
+  else
+    return WHITE;
 }

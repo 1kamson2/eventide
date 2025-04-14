@@ -17,7 +17,7 @@ void Renderer::RenderVoxels(std::shared_ptr<Voxel>& voxel_to_render) {
     return;
   }
   if (!voxel_to_render->IsBlank()) {
-    DrawCube(voxel_to_render->GetPosition(), 1, 1, 1, GREEN);
+    DrawCube(voxel_to_render->GetPosition(), 1, 1, 1, voxel_to_render->color);
   }
   RenderVoxels(voxel_to_render->left);
   RenderVoxels(voxel_to_render->right);

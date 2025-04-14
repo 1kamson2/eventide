@@ -16,7 +16,7 @@ class Environment {
   void WorldInit(std::vector<Chunk>& chunks_to_render);
   float GetElevation(const float& x, const float& y, const float& z,
                      const float& f, const float& norm);
-  Color AssignColor(const float& elevation) const;
+  Color AssignColor(const float& elevation, const float& y) const;
   void ChunkRender(std::vector<Chunk>& chunks_to_render, const float& f,
                    const float& norm, const int& x, const int& y, const int& z);
   void IsInAABB(const std::unique_ptr<Voxel>& cursor,

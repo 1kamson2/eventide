@@ -9,7 +9,7 @@ int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(run.width, run.height, "Test");
-  SetTargetFPS(1000);
+  SetTargetFPS(1 << 31);
   DisableCursor();
   float delta;
   while (!WindowShouldClose()) {
@@ -30,3 +30,6 @@ int main() {
 }
 
 // TODO: No colors, prob we lose somewhere our reference to the color.
+// TODO: Fix the terrain generation
+// TODO: Fix the rendering
+// TODO: Make rendering faster
