@@ -17,6 +17,7 @@ class Chunk {
   Vector3 GetMidPoint() const;
 
   // std::shared_ptr<Voxel>& GetVoxelFromLayer(const float& y);
+  bool IsVoxelInChunk(const std::shared_ptr<Voxel>& voxel);
 
   void LoadVoxelsToY(float& max_y,
                      std::vector<std::shared_ptr<Voxel>>& voxels_to_render,

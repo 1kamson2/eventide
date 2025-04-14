@@ -2,6 +2,9 @@
 
 #include <cstddef>
 
+#include "Utils/Globals.hpp"
+using namespace chunk_definitions;
+
 Chunk::Chunk(const Vector3& mid_point) : mid_point(mid_point) {
   std::cout << "[INFO] Chunk was created" << std::endl;
 }
@@ -78,4 +81,16 @@ void Chunk::LoadVoxelsToY(float& max_y,
 
   LoadVoxelsToY(max_y, voxels_to_render, curr_voxel->left);
   LoadVoxelsToY(max_y, voxels_to_render, curr_voxel->right);
+}
+
+bool Chunk::IsVoxelInChunk(const std::shared_ptr<Voxel>& voxel) {
+  Vector3 vox_pos = voxel->GetPosition();
+  Vector3 chunk_mid = GetMidPoint();
+
+  return (vox_pos.x >= chunk_mid.x - SIZE / 2) &&
+         (vox_pos.x <= chunk_mid.x + SIZE / 2) &&
+         (vox_pos.y >= chunk_mid.y - SIZE / 2) &&
+         (vox_pos.y <= chunk_mid.y + SIZE / 2) &&
+         (vox_pos.z >= chunk_mid.z - SIZE / 2) &&
+         (vox_pos.z <= chunk_mid.z + SIZE / 2);
 }
