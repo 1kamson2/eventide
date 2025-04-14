@@ -25,27 +25,3 @@ bool Voxel::IsBlank() {
   return color.a == col2.a && color.b == col2.b && color.g == col2.g &&
          color.r == col2.r;
 }
-std::shared_ptr<Voxel>& Voxel::FindVoxelOnY(
-    float& y, std::shared_ptr<Voxel>& curr_voxel) {
-  // begin from root
-  std::shared_ptr<Voxel> null = nullptr;
-  if (curr_voxel == nullptr) {
-    return null;
-  }
-
-  if (curr_voxel->GetPosition().y == y) {
-    return curr_voxel;
-  }
-
-  std::shared_ptr<Voxel> left_vox = FindVoxelOnY(y, curr_voxel->left);
-  if (left_vox) {
-    return left_vox;
-  }
-  std::shared_ptr<Voxel> right_vox = FindVoxelOnY(y, curr_voxel->right);
-
-  if (right_vox) {
-    return right_vox;
-  }
-
-  return null;
-}

@@ -9,13 +9,16 @@
 #include "Utils/Globals.hpp"
 #include "Utils/SimplexNoise.h"
 using namespace chunk_definitions;
+using namespace env_definitions;
 Environment::Environment() {}
 void Environment::WorldInit(std::vector<Chunk>& chunks_to_render) {
   uint64_t voxels_currently_rendered = 0, chunks_currently_rendered = 0;
-  constexpr float f = 1.0f, norm = 1.75f, max_chunks = 128;
-  for (float y = 0; y < SIZE; y += SIZE) {
-    for (float x = 0; x < 8 * SIZE; x += SIZE) {
-      for (float z = 0; z < 8 * SIZE; z += SIZE) {
+  std::cout << Y_BOUND << std::endl;
+  std::cout << X_BOUND << std::endl;
+  std::cout << Z_BOUND << std::endl;
+  for (float y = 0; y < Y_BOUND; y += SIZE) {
+    for (float x = 0; x < X_BOUND; x += SIZE) {
+      for (float z = 0; z < Z_BOUND; z += SIZE) {
         if (chunks_currently_rendered >= max_chunks) {
           std::cout << "[INFO] Rendered the following:" << std::endl;
           std::cout << "       Voxels: " << voxels_currently_rendered
@@ -73,12 +76,10 @@ float Environment::GetElevation(const float& x, const float& y, const float& z,
 }
 
 Color Environment::AssignColor(const float& elevation, const float& y) const {
-  if (elevation < 0.1 && y <= 2)
+  if (elevation < 0.1) {
     return BLANK;
-  else if (elevation < 0.1 && y > 2) {
-    return BLUE;
   } else if (elevation < 0.2)
-    return YELLOW;
+    return BLUE;
   else if (elevation < 0.3)
     return GREEN;
   else if (elevation < 0.5)

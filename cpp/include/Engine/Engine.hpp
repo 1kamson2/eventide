@@ -13,8 +13,7 @@ class Engine {
   Renderer ren;
   Agent agt;
   std::vector<Chunk> chunks;
-  std::vector<Chunk> chunks_to_render;  // This one keeps all the chunks to
-  // render
+  std::vector<std::shared_ptr<Voxel>> voxels_to_render;
   Engine();
   void ProcessInput(const float& dt);
   void DetectCollision(const float& dt);

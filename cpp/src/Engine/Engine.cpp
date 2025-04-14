@@ -36,15 +36,15 @@ void Engine::ProcessInput(const float& dt) {
 void Engine::GetChunksToRender() {
   Vector3 agent_pos = agt.GetPosition();
   // TODO: CHANGE IT LATER FOR MORE INTELLIGENT APPROACH
-  chunks_to_render.clear();
+  // TODO: HARDCODED VALUE
+  // TODO: MORE INTELLIGENT APPROACH (EARLY)
+  // TODO: CHECK IF ALWAYS CAN ESCAPE EARLY
+  voxels_to_render.clear();
+  float max_y = 3.0f;
   for (Chunk& chunk : chunks) {
-    // TODO: HARDCODED VALUE
-    // TODO: MORE INTELLIGENT APPROACH (EARLY)
-    if (!chunk.InView(agent_pos, DEFAULT_RENDER_DISTANCE)) {
-      // TODO: CHECK IF ALWAYS CAN ESCAPE EARLY
-      continue;
+    if (chunk.InView(agent_pos, DEFAULT_RENDER_DISTANCE)) {
+      chunk.LoadVoxelsToY(max_y, voxels_to_render, chunk.root_voxel);
     }
-    chunks_to_render.push_back(chunk);
   }
 }
 
@@ -52,5 +52,5 @@ void Engine::GameLoop(const float& dt) {
   ProcessInput(dt);
   // DetectCollision(dt);
   GetChunksToRender();
-  ren.TraverseChunks(chunks_to_render);
+  ren.RenderVoxels(voxels_to_render);
 }

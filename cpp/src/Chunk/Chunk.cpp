@@ -60,3 +60,22 @@ bool operator==(const Voxel& lhs, const Voxel& rhs) {
   return lhs_pos.x == rhs_pos.x && lhs_pos.y == rhs_pos.y &&
          lhs_pos.z == rhs_pos.z;
 }
+void Chunk::LoadVoxelsToY(float& max_y,
+                          std::vector<std::shared_ptr<Voxel>>& voxels_to_render,
+                          std::shared_ptr<Voxel>& curr_voxel) {
+  // TODO: We shouldn't clear all buffer and then load again.
+  if (curr_voxel == nullptr) {
+    return;
+  }
+
+  // TODO: Should be able to exit faster
+  if (curr_voxel->GetPosition().y >= -max_y) {
+    voxels_to_render.push_back(curr_voxel);
+  } else {
+    // TODO: Don't know if this works okay?
+    return;
+  }
+
+  LoadVoxelsToY(max_y, voxels_to_render, curr_voxel->left);
+  LoadVoxelsToY(max_y, voxels_to_render, curr_voxel->right);
+}
