@@ -14,7 +14,7 @@ class Engine {
   Renderer ren;
   Agent agt;
   std::vector<Chunk> chunks;
-  std::vector<std::shared_ptr<Voxel>> voxels_to_render;
+  std::vector<Chunk> chunks_to_render;
   std::unordered_map<size_t, bool> loaded_chunks;
 
   Engine();

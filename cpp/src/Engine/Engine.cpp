@@ -1,5 +1,6 @@
 #include "Engine/Engine.hpp"
 
+#include <cmath>
 #include <memory>
 
 #include "Utils/Globals.hpp"
@@ -49,7 +50,6 @@ void Engine::GetChunksToRender() {
   // TODO: HARDCODED VALUE
   // TODO: MORE INTELLIGENT APPROACH (EARLY)
   // TODO: CHECK IF ALWAYS CAN ESCAPE EARLY
-  std::vector<std::shared_ptr<Voxel>> temp_voxel_buffer;
   // voxels_to_render.clear();
   float max_y = 3.0f;
   /* The chunks are stored in the following manner:
@@ -78,23 +78,20 @@ void Engine::GetChunksToRender() {
 
     if ((PREV_STATE == false) && (loaded_chunks[idx] == true)) {
       /* Should load */
-      chunks[idx].LoadVoxelsToY(max_y, temp_voxel_buffer,
-                                chunks[idx].root_voxel);
-      voxels_to_render.insert(
-          voxels_to_render.end(),
-          std::make_move_iterator(temp_voxel_buffer.begin()),
-          std::make_move_iterator(temp_voxel_buffer.end()));
+      Chunk chunk(chunks[idx].GetMidPoint());
+      chunks[idx].LoadVoxelsLTY(max_y, chunk, chunks[idx].root_voxel);
+      chunks_to_render.push_back(chunk);
       std::cout << "[INFO] Loaded the chunk: " << idx << std::endl;
-      temp_voxel_buffer.clear();
     } else if ((PREV_STATE == true) && (loaded_chunks[idx] == false)) {
       /* Should unload */
-      for (size_t vox_cand = 0; vox_cand < voxels_to_render.size();
-           vox_cand += SIZE * SIZE * max_y) {
-        if (chunks[idx].IsVoxelInChunk(voxels_to_render[vox_cand])) {
-          voxels_to_render.erase(
-              voxels_to_render.begin() + vox_cand,
-              voxels_to_render.begin() + vox_cand + SIZE * SIZE * max_y);
+      if (chunks_to_render.size() == 0) {
+        break;
+      }
+      for (size_t _idx = 0; _idx < chunks_to_render.size(); ++_idx) {
+        if (chunks_to_render[_idx].TheSameChunk(chunks[idx])) {
+          chunks_to_render.erase(chunks_to_render.begin() + _idx);
           std::cout << "[INFO] Unloaded the chunk: " << idx << std::endl;
+          break;
         }
       }
     }
@@ -105,5 +102,5 @@ void Engine::GameLoop(const float& dt) {
   ProcessInput(dt);
   // DetectCollision(dt);
   GetChunksToRender();
-  ren.RenderVoxels(voxels_to_render);
+  ren.TraverseChunks(chunks_to_render);
 }

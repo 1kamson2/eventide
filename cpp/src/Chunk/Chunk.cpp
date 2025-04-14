@@ -63,8 +63,7 @@ bool operator==(const Voxel& lhs, const Voxel& rhs) {
   return lhs_pos.x == rhs_pos.x && lhs_pos.y == rhs_pos.y &&
          lhs_pos.z == rhs_pos.z;
 }
-void Chunk::LoadVoxelsToY(float& max_y,
-                          std::vector<std::shared_ptr<Voxel>>& voxels_to_render,
+void Chunk::LoadVoxelsLTY(float& max_y, Chunk& chunk_to_render,
                           std::shared_ptr<Voxel>& curr_voxel) {
   // TODO: We shouldn't clear all buffer and then load again.
   if (curr_voxel == nullptr) {
@@ -73,14 +72,11 @@ void Chunk::LoadVoxelsToY(float& max_y,
 
   // TODO: Should be able to exit faster
   if (curr_voxel->GetPosition().y >= -max_y) {
-    voxels_to_render.push_back(curr_voxel);
-  } else {
-    // TODO: Don't know if this works okay?
-    return;
+    chunk_to_render.Update(curr_voxel);
   }
 
-  LoadVoxelsToY(max_y, voxels_to_render, curr_voxel->left);
-  LoadVoxelsToY(max_y, voxels_to_render, curr_voxel->right);
+  LoadVoxelsLTY(max_y, chunk_to_render, curr_voxel->left);
+  LoadVoxelsLTY(max_y, chunk_to_render, curr_voxel->right);
 }
 
 bool Chunk::IsVoxelInChunk(const std::shared_ptr<Voxel>& voxel) {
@@ -93,4 +89,11 @@ bool Chunk::IsVoxelInChunk(const std::shared_ptr<Voxel>& voxel) {
          (vox_pos.y <= chunk_mid.y + SIZE / 2) &&
          (vox_pos.z >= chunk_mid.z - SIZE / 2) &&
          (vox_pos.z <= chunk_mid.z + SIZE / 2);
+}
+
+bool Chunk::TheSameChunk(const Chunk& rhs) {
+  Vector3 rhs_pos = rhs.GetMidPoint();
+  Vector3 self_pos = GetMidPoint();
+  return rhs_pos.x == self_pos.x && rhs_pos.y == self_pos.y &&
+         rhs_pos.z == self_pos.z;
 }

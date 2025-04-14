@@ -77,9 +77,9 @@ float Environment::GetElevation(const float& x, const float& y, const float& z,
 
 Color Environment::AssignColor(const float& elevation, const float& y) const {
   if (elevation < 0.1) {
-    return BLANK;
-  } else if (elevation < 0.2)
     return BLUE;
+  } else if (elevation < 0.2)
+    return RED;
   else if (elevation < 0.3)
     return GREEN;
   else if (elevation < 0.5)
@@ -89,5 +89,5 @@ Color Environment::AssignColor(const float& elevation, const float& y) const {
   else if (elevation < 0.9)
     return YELLOW;
   else
-    return WHITE;
+    return BLANK;
 }
