@@ -33,3 +33,5 @@ int main() {
 // TODO: Make rendering faster
 //        - BFS? DFS?
 //        - There is no need to render unseen voxels
+// TODO: Issue with turning around and not rendering
+// TODO: Make a ray to support better rendering (if hits the voxel, render)

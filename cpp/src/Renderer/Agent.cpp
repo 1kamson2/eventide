@@ -35,24 +35,24 @@ void Agent::CameraChangeProjection() {
   }
 }
 
-void Agent::AgentUpdate(AgentAction state) {
-  float dt_x = 0.0f, dt_y = 0.0f, dt_vert = 0.0f, dt_horiz = 0.0f;
+void Agent::StateUpdate(AgentAction state) {
+  float x_dt = 0.0f, y_dt = 0.0f;
   switch (state) {
     case AgentAction::MOVE_X_NORTH:
-      dt_x = this->movement_spd;
-      agent_pos.x += dt_x;
+      agent_pos.x += this->movement_spd;
+      x_dt = this->movement_spd;
       break;
     case AgentAction::MOVE_X_SOUTH:
-      dt_x = -this->movement_spd;
-      agent_pos.x += dt_x;
+      agent_pos.x += -this->movement_spd;
+      x_dt = -this->movement_spd;
       break;
     case AgentAction::MOVE_X_EAST:
-      dt_y = -this->movement_spd;
-      agent_pos.y += dt_y;
+      agent_pos.y += -this->movement_spd;
+      y_dt = -this->movement_spd;
       break;
     case AgentAction::MOVE_X_WEST:
-      dt_y = this->movement_spd;
-      agent_pos.y += dt_y;
+      agent_pos.y += this->movement_spd;
+      y_dt = this->movement_spd;
       break;
     case AgentAction::ROLL:
       // for now no rolling
@@ -68,11 +68,16 @@ void Agent::AgentUpdate(AgentAction state) {
       std::cout << "[WARNING] Unhandled state in AgentUpdate" << std::endl;
   }
   /* TODO: Put a cap, consider negative values */
-  dt_vert = GetMouseDelta().x * this->rot_spd;
-  dt_horiz = GetMouseDelta().y * this->rot_spd;
+  CameraUpdate(x_dt, y_dt);
+}
+
+void Agent::CameraUpdate(const float& x_dt, const float& y_dt) {
+  float vertical_dt = 0.0f, horizontal_dt = 0.0f;
+  vertical_dt = GetMouseDelta().x * this->rot_spd;
+  horizontal_dt = GetMouseDelta().y * this->rot_spd;
   cam.up = (Vector3){this->yaw, this->pitch, this->roll};
-  UpdateCameraPro(&this->cam, (Vector3){dt_x, dt_y, 0.0f},
-                  (Vector3){dt_vert, dt_horiz, 0.0f},
+  UpdateCameraPro(&this->cam, (Vector3){x_dt, y_dt, 0.0f},
+                  (Vector3){vertical_dt, horizontal_dt, 0.0f},
                   GetMouseWheelMove() * 2.0f);
   // this->cursor->data.position = this->cam.target;
 }

@@ -20,26 +20,26 @@ Engine::Engine()
 
 void Engine::ProcessInput(const float& dt) {
   if (IsKeyDown(KEY_P)) {
-    agt.AgentUpdate(AgentAction::PROJECTION);
+    agt.StateUpdate(AgentAction::PROJECTION);
   }
   if (IsKeyDown(KEY_W)) {
-    agt.AgentUpdate(AgentAction::MOVE_X_NORTH);
+    agt.StateUpdate(AgentAction::MOVE_X_NORTH);
   }
   if (IsKeyDown(KEY_S)) {
-    agt.AgentUpdate(AgentAction::MOVE_X_SOUTH);
+    agt.StateUpdate(AgentAction::MOVE_X_SOUTH);
   }
   if (IsKeyDown(KEY_A)) {
-    agt.AgentUpdate(AgentAction::MOVE_X_EAST);
+    agt.StateUpdate(AgentAction::MOVE_X_EAST);
   }
   if (IsKeyDown(KEY_D)) {
-    agt.AgentUpdate(AgentAction::MOVE_X_WEST);
+    agt.StateUpdate(AgentAction::MOVE_X_WEST);
   }
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     AgentAction act = AgentAction::TRY_TO_CREATE;
   } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
     AgentAction act = AgentAction::TRY_TO_CREATE;
   } else {
-    agt.AgentUpdate(AgentAction::IDLE);
+    agt.StateUpdate(AgentAction::IDLE);
   }
 }
 
@@ -51,10 +51,6 @@ bool Engine::CheckIfChunkInBuffer(const size_t& idx) {
 
 void Engine::GetChunksToRender() {
   Vector3 agent_pos = agt.GetPosition();
-  // TODO: CHANGE IT LATER FOR MORE INTELLIGENT APPROACH
-  // TODO: HARDCODED VALUE
-  // TODO: MORE INTELLIGENT APPROACH (EARLY)
-  // TODO: CHECK IF ALWAYS CAN ESCAPE EARLY
   // voxels_to_render.clear();
   float max_y = 3.0f;
   /* The chunks are stored in the following manner:

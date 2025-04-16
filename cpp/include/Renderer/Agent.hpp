@@ -22,7 +22,8 @@ class Agent {
   Camera cam;
   Agent(Vector3 agent_pos);
   Vector3 GetPosition() const;
+  void CameraUpdate(const float& x_dt, const float& y_dt);
   void CameraChangeProjection();
-  void AgentUpdate(AgentAction state);
+  void StateUpdate(AgentAction state);
 };
 }  // namespace agent

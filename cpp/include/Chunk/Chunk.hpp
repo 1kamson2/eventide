@@ -27,7 +27,10 @@ class Chunk {
   bool TheSameChunk(const Chunk& rhs);
 
   void LoadVoxelsLTY(float& max_y, std::shared_ptr<Voxel>& curr_voxel);
-  bool InView(Vector3& agent_pos, const float& render_dist);
+  bool InView(Vector3& vec_pos, const float& max_allowed_dist);
+  bool InAxisView(const float& first_scalar_point_value,
+                  const float& second_scalar_point_value,
+                  const float& max_allowed_dist) const;
   std::shared_ptr<Voxel> Insert(std::shared_ptr<Voxel>& last_free_voxel,
                                 std::shared_ptr<Voxel>& new_voxel, int depth);
   friend bool operator==(const Voxel& lhs, const Voxel& rhs);

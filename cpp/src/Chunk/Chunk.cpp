@@ -1,5 +1,6 @@
 #include "Chunk/Chunk.hpp"
 
+#include <cmath>
 #include <cstddef>
 
 using namespace chunk;
@@ -32,27 +33,61 @@ std::shared_ptr<Voxel> Chunk::Insert(std::shared_ptr<Voxel>& last_free_voxel,
 
 Vector3 Chunk::GetMidPoint() const { return mid_point; }
 
-bool Chunk::InView(Vector3& agent_pos, const float& render_dist) {
-  Vector3 self_pos = GetMidPoint();
-  float dist = GetDistanceSquared(agent_pos, self_pos);
-  return dist < render_dist * render_dist;
+bool Chunk::InView(Vector3& vec_pos, const float& max_allowed_dist) {
+  /*
+   * Parameters:
+   *   vec_pos: Vector that will be used to measure distance in respect to this
+   *            vector.
+   *   max_allowed_dist: Distance that will allow the chunks to be seen.
+   *
+   * Function:
+   *   Check if the voxel is in agent's view.
+   */
+  Vector3 self_midpoint = GetMidPoint();
+  if (!InAxisView(vec_pos.x, self_midpoint.x, max_allowed_dist)) {
+    return false;
+  }
+  if (!InAxisView(vec_pos.y, self_midpoint.y, max_allowed_dist)) {
+    return false;
+  }
+  if (!InAxisView(vec_pos.z, self_midpoint.z, max_allowed_dist)) {
+    return false;
+  }
+
+  float dist = GetDistanceSquared(vec_pos, self_midpoint);
+  return dist < (max_allowed_dist + LENGTH) * (max_allowed_dist + LENGTH);
 }
 
+bool Chunk::InAxisView(const float& first_scalar_point_value,
+                       const float& second_scalar_point_value,
+                       const float& max_allowed_dist) const {
+  /*
+   * Parameters:
+   *  first_scalar_point_value: The value of point on given axis.
+   *  second_scalar_point_value: The value of point on given axis.
+   *  max_allowed_dist: The maximum distance allowed.
+   * Function:
+   *  Check if the distance in straight line doesn't exceed the max_allowed_dist
+   *
+   * */
+  return fabs(first_scalar_point_value - second_scalar_point_value) <=
+         max_allowed_dist + LENGTH;
+}
 float Chunk::GetDistanceSquared(Vector3& vec1, Vector3& vec2) {
-  float dist_x = vec1.x - vec2.x;
-  float dist_y = vec1.y - vec2.y;
-  float dist_z = vec1.z - vec2.z;
-  return dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
+  float x_dist = vec1.x - vec2.x;
+  float y_dist = vec1.y - vec2.y;
+  float z_dist = vec1.z - vec2.z;
+  return x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
 }
 
 float Chunk::GetDistanceSquared(const std::shared_ptr<Voxel>& vox1,
                                 const std::shared_ptr<Voxel>& vox2) {
   Vector3 vox1_pos = vox1->GetPosition();
   Vector3 vox2_pos = vox2->GetPosition();
-  float dist_x = vox1_pos.x - vox2_pos.x;
-  float dist_y = vox1_pos.y - vox2_pos.y;
-  float dist_z = vox1_pos.z - vox2_pos.z;
-  return dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
+  float x_dist = vox1_pos.x - vox2_pos.x;
+  float y_dist = vox1_pos.y - vox2_pos.y;
+  float z_dist = vox1_pos.z - vox2_pos.z;
+  return x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
 }
 
 bool operator==(const Voxel& lhs, const Voxel& rhs) {
