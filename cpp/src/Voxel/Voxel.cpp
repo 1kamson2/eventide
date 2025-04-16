@@ -1,5 +1,6 @@
 #include "Voxel/Voxel.hpp"
 
+using namespace voxel;
 Voxel::Voxel(Vector3 position, Color col) : position(position), color(col) {}
 
 float Voxel::GetAxis(const int& dim) const {

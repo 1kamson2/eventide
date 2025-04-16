@@ -3,6 +3,12 @@
 #include <vector>
 
 #include "Voxel/Voxel.hpp"
+
+using namespace voxel;
+namespace chunk {
+constexpr float SIZE = 16.0f;
+constexpr float DEFAULT_DISTANCE = 2 * chunk::SIZE;
+
 class Chunk {
  public:
   std::shared_ptr<Voxel> root_voxel = nullptr;
@@ -26,3 +32,4 @@ class Chunk {
                                 std::shared_ptr<Voxel>& new_voxel, int depth);
   friend bool operator==(const Voxel& lhs, const Voxel& rhs);
 };
+}  // namespace chunk

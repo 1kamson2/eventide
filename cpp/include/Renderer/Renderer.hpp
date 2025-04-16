@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Chunk/Chunk.hpp"
+using namespace chunk;
 class Renderer {
  public:
   std::shared_ptr<Voxel> best_cand_voxel = nullptr;

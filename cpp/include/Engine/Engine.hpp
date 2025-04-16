@@ -5,8 +5,10 @@
 
 #include "Chunk/Chunk.hpp"
 #include "Environment/Environment.hpp"
-#include "Renderer/Camera.hpp"
+#include "Renderer/Agent.hpp"
 #include "Renderer/Renderer.hpp"
+using namespace environment;
+using namespace agent;
 class Engine {
  public:
   static constexpr int width = 640, height = 480;

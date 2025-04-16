@@ -3,39 +3,43 @@
 #include <cmath>
 #include <memory>
 
-#include "Utils/Globals.hpp"
+#include "Chunk/Chunk.hpp"
+#include "Environment/Environment.hpp"
 
-using namespace cam_definitions;
-using namespace chunk_definitions;
-using namespace env_definitions;
+using namespace agent;
+using namespace chunk;
+using namespace environment;
 Engine::Engine()
-    : env(), ren(), agt((Vector3){0, 16, 4}), loaded_chunks(max_chunks, false) {
+    : env(),
+      ren(),
+      agt((Vector3){0, 16, 4}),
+      loaded_chunks(MAX_CHUNKS_ALLOWED, false) {
   std::cout << "[INFO] Loading chunks." << std::endl;
   env.WorldInit(chunks);
 }
 
 void Engine::ProcessInput(const float& dt) {
   if (IsKeyDown(KEY_P)) {
-    agt.AgentUpdate(Action::PROJECTION);
+    agt.AgentUpdate(AgentAction::PROJECTION);
   }
   if (IsKeyDown(KEY_W)) {
-    agt.AgentUpdate(Action::MOVE_X_NORTH);
+    agt.AgentUpdate(AgentAction::MOVE_X_NORTH);
   }
   if (IsKeyDown(KEY_S)) {
-    agt.AgentUpdate(Action::MOVE_X_SOUTH);
+    agt.AgentUpdate(AgentAction::MOVE_X_SOUTH);
   }
   if (IsKeyDown(KEY_A)) {
-    agt.AgentUpdate(Action::MOVE_X_EAST);
+    agt.AgentUpdate(AgentAction::MOVE_X_EAST);
   }
   if (IsKeyDown(KEY_D)) {
-    agt.AgentUpdate(Action::MOVE_X_WEST);
+    agt.AgentUpdate(AgentAction::MOVE_X_WEST);
   }
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    Action act = Action::TRY_TO_CREATE;
+    AgentAction act = AgentAction::TRY_TO_CREATE;
   } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-    Action act = Action::TRY_TO_CREATE;
+    AgentAction act = AgentAction::TRY_TO_CREATE;
   } else {
-    agt.AgentUpdate(Action::IDLE);
+    agt.AgentUpdate(AgentAction::IDLE);
   }
 }
 
@@ -69,7 +73,7 @@ void Engine::GetChunksToRender() {
       PREV_STATE = loaded_chunks[idx];
     }
 
-    if (chunks[idx].InView(agent_pos, DEFAULT_RENDER_DISTANCE)) {
+    if (chunks[idx].InView(agent_pos, DEFAULT_DISTANCE)) {
       /* The chunk possibly not seen */
       loaded_chunks[idx] = true;
     } else {

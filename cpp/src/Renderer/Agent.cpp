@@ -1,4 +1,5 @@
-#include "Renderer/Camera.hpp"
+#include "Renderer/Agent.hpp"
+using namespace agent;
 
 Agent::Agent(Vector3 agent_pos) : agent_pos(agent_pos) {
   cam = {0};
@@ -34,33 +35,33 @@ void Agent::CameraChangeProjection() {
   }
 }
 
-void Agent::AgentUpdate(Action state) {
+void Agent::AgentUpdate(AgentAction state) {
   float dt_x = 0.0f, dt_y = 0.0f, dt_vert = 0.0f, dt_horiz = 0.0f;
   switch (state) {
-    case Action::MOVE_X_NORTH:
+    case AgentAction::MOVE_X_NORTH:
       dt_x = this->movement_spd;
       agent_pos.x += dt_x;
       break;
-    case Action::MOVE_X_SOUTH:
+    case AgentAction::MOVE_X_SOUTH:
       dt_x = -this->movement_spd;
       agent_pos.x += dt_x;
       break;
-    case Action::MOVE_X_EAST:
+    case AgentAction::MOVE_X_EAST:
       dt_y = -this->movement_spd;
       agent_pos.y += dt_y;
       break;
-    case Action::MOVE_X_WEST:
+    case AgentAction::MOVE_X_WEST:
       dt_y = this->movement_spd;
       agent_pos.y += dt_y;
       break;
-    case Action::ROLL:
+    case AgentAction::ROLL:
       // for now no rolling
       roll += 0.0f;
       break;
-    case Action::PROJECTION:
+    case AgentAction::PROJECTION:
       CameraChangeProjection();
       break;
-    case Action::IDLE:
+    case AgentAction::IDLE:
       /* Default state */
       break;
     default:

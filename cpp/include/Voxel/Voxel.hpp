@@ -1,8 +1,11 @@
 #pragma once
+
 #include <raylib.h>
 
 #include <memory>
-#include <vector>
+namespace voxel {
+
+constexpr float LENGTH = 1.0f;
 
 class Voxel {
  public:
@@ -16,3 +19,4 @@ class Voxel {
   Vector3 GetPosition() const;
   bool IsBlank();
 };
+}  // namespace voxel

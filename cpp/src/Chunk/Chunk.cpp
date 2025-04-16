@@ -2,9 +2,7 @@
 
 #include <cstddef>
 
-#include "Utils/Globals.hpp"
-using namespace chunk_definitions;
-
+using namespace chunk;
 Chunk::Chunk(const Vector3& mid_point) : mid_point(mid_point) {
   std::cout << "[INFO] Chunk was created" << std::endl;
 }

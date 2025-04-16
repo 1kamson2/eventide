@@ -7,10 +7,9 @@
 #include <cstdint>
 
 #include "Environment/Biomes.hpp"
-#include "Utils/Globals.hpp"
 #include "Utils/SimplexNoise.h"
-using namespace chunk_definitions;
-using namespace env_definitions;
+using namespace chunk;
+using namespace environment;
 using namespace biomes;
 Environment::Environment() {}
 void Environment::WorldInit(std::vector<Chunk>& chunks_to_render) {
@@ -21,7 +20,7 @@ void Environment::WorldInit(std::vector<Chunk>& chunks_to_render) {
   for (float y = 0; y < Y_BOUND; y += SIZE) {
     for (float x = 0; x < X_BOUND; x += SIZE) {
       for (float z = 0; z < Z_BOUND; z += SIZE) {
-        if (chunks_currently_rendered >= max_chunks) {
+        if (chunks_currently_rendered >= MAX_CHUNKS_ALLOWED) {
           std::cout << "[INFO] Rendered the following:" << std::endl;
           std::cout << "       Voxels: " << voxels_currently_rendered
                     << std::endl;
@@ -29,7 +28,7 @@ void Environment::WorldInit(std::vector<Chunk>& chunks_to_render) {
                     << std::endl;
           return;
         }
-        ChunkRender(chunks_to_render, f, norm, x, y, z);
+        ChunkRender(chunks_to_render, FREQ, NORM, x, y, z);
         ++chunks_currently_rendered;
         voxels_currently_rendered += SIZE * SIZE * SIZE;
       }

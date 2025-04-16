@@ -5,8 +5,16 @@
 #include <vector>
 
 #include "Chunk/Chunk.hpp"
-#include "Utils/Globals.hpp"
+#include "Utils/Enums.hpp"
 #include "Voxel/Voxel.hpp"
+using namespace chunk;
+namespace environment {
+constexpr float Y_BOUND = SIZE * 2;
+constexpr float X_BOUND = SIZE * 16;
+constexpr float Z_BOUND = SIZE * 16;
+constexpr float FREQ = 1.0f;
+constexpr float NORM = 1.75f;
+constexpr float MAX_CHUNKS_ALLOWED = 128.0f;
 class Environment {
  public:
   uint64_t max_voxels_rendered = 1 << 63;
@@ -27,3 +35,4 @@ class Environment {
   void IsInAABB(const std::unique_ptr<Voxel>& cursor,
                 const std::shared_ptr<Voxel>& voxel);
 };
+}  // namespace environment

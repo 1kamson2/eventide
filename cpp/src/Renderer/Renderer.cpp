@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+using namespace chunk;
 Renderer::Renderer() {}
 
 void Renderer::TraverseChunks(std::vector<Chunk>& chunks_to_render) {
