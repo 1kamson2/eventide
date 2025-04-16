@@ -37,7 +37,7 @@ Vector3 Chunk::GetMidPoint() const { return mid_point; }
 bool Chunk::InView(Vector3& agent_pos, const float& render_dist) {
   Vector3 self_pos = GetMidPoint();
   float dist = GetDistanceSquared(agent_pos, self_pos);
-  return dist < render_dist;
+  return dist < render_dist * render_dist;
 }
 
 float Chunk::GetDistanceSquared(Vector3& vec1, Vector3& vec2) {
@@ -63,8 +63,7 @@ bool operator==(const Voxel& lhs, const Voxel& rhs) {
   return lhs_pos.x == rhs_pos.x && lhs_pos.y == rhs_pos.y &&
          lhs_pos.z == rhs_pos.z;
 }
-void Chunk::LoadVoxelsLTY(float& max_y, Chunk& chunk_to_render,
-                          std::shared_ptr<Voxel>& curr_voxel) {
+void Chunk::LoadVoxelsLTY(float& max_y, std::shared_ptr<Voxel>& curr_voxel) {
   // TODO: We shouldn't clear all buffer and then load again.
   if (curr_voxel == nullptr) {
     return;
@@ -72,11 +71,11 @@ void Chunk::LoadVoxelsLTY(float& max_y, Chunk& chunk_to_render,
 
   // TODO: Should be able to exit faster
   if (curr_voxel->GetPosition().y >= -max_y) {
-    chunk_to_render.Update(curr_voxel);
+    Update(curr_voxel);
   }
 
-  LoadVoxelsLTY(max_y, chunk_to_render, curr_voxel->left);
-  LoadVoxelsLTY(max_y, chunk_to_render, curr_voxel->right);
+  LoadVoxelsLTY(max_y, curr_voxel->left);
+  LoadVoxelsLTY(max_y, curr_voxel->right);
 }
 
 bool Chunk::IsVoxelInChunk(const std::shared_ptr<Voxel>& voxel) {

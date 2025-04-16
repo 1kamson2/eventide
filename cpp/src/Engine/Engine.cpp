@@ -7,7 +7,9 @@
 
 using namespace cam_definitions;
 using namespace chunk_definitions;
-Engine::Engine() : env(), ren(), agt((Vector3){0, 2, 4}) {
+using namespace env_definitions;
+Engine::Engine()
+    : env(), ren(), agt((Vector3){0, 2, 4}), loaded_chunks(max_chunks, false) {
   std::cout << "[INFO] Loading chunks." << std::endl;
   env.WorldInit(chunks);
 }
@@ -38,11 +40,10 @@ void Engine::ProcessInput(const float& dt) {
 }
 
 bool Engine::CheckIfChunkInBuffer(const size_t& idx) {
-  auto iterator = loaded_chunks.find(idx);
-  return iterator != loaded_chunks.end();
+  return loaded_chunks[idx];
 }
 
-bool Engine::PeekAtNextChunk(const Chunk& chunk) {}
+// bool Engine::PeekAtNextChunk(const Chunk& chunk) {}
 
 void Engine::GetChunksToRender() {
   Vector3 agent_pos = agt.GetPosition();
@@ -78,18 +79,17 @@ void Engine::GetChunksToRender() {
 
     if ((PREV_STATE == false) && (loaded_chunks[idx] == true)) {
       /* Should load */
-      Chunk chunk(chunks[idx].GetMidPoint());
-      chunks[idx].LoadVoxelsLTY(max_y, chunk, chunks[idx].root_voxel);
-      chunks_to_render.push_back(chunk);
       std::cout << "[INFO] Loaded the chunk: " << idx << std::endl;
+      chunks_to_render.push_back(chunks[idx]);
     } else if ((PREV_STATE == true) && (loaded_chunks[idx] == false)) {
       /* Should unload */
       if (chunks_to_render.size() == 0) {
         break;
       }
-      for (size_t _idx = 0; _idx < chunks_to_render.size(); ++_idx) {
-        if (chunks_to_render[_idx].TheSameChunk(chunks[idx])) {
-          chunks_to_render.erase(chunks_to_render.begin() + _idx);
+      for (auto it = chunks_to_render.begin(); it != chunks_to_render.end();
+           ++it) {
+        if (it->TheSameChunk(chunks[idx])) {
+          chunks_to_render.erase(it);
           std::cout << "[INFO] Unloaded the chunk: " << idx << std::endl;
           break;
         }

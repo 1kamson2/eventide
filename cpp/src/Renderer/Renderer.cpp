@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-
 Renderer::Renderer() {}
 
 void Renderer::TraverseChunks(std::vector<Chunk>& chunks_to_render) {
@@ -16,7 +15,9 @@ void Renderer::RenderVoxels(std::shared_ptr<Voxel>& voxel) {
   if (voxel == nullptr) {
     return;
   }
-  if (!voxel->IsBlank()) {
+  Vector3 pos = voxel->GetPosition();
+
+  if (!voxel->IsBlank() && voxel->GetPosition().y == 0) {
     DrawCube(voxel->GetPosition(), 1.0f, 1.0f, 1.0f, voxel->color);
   }
 

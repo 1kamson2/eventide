@@ -37,7 +37,7 @@ constexpr float DEFAULT_FOV = 60.0f;
 constexpr float DEFAULT_PROJ = CAMERA_PERSPECTIVE;
 constexpr int DEFAULT_MODE = CAMERA_FIRST_PERSON;
 // Value in chunks, it must be multiplied by SIZE of the chunk
-constexpr float DEFAULT_RENDER_DISTANCE = 32.0f * chunk_definitions::SIZE;
+constexpr float DEFAULT_RENDER_DISTANCE = 4 * chunk_definitions::SIZE;
 }  // namespace cam_definitions
 
 namespace env_definitions {
@@ -46,5 +46,5 @@ constexpr float X_BOUND = chunk_definitions::SIZE * 16;
 constexpr float Z_BOUND = chunk_definitions::SIZE * 16;
 constexpr float f = 1.0f;
 constexpr float norm = 1.75f;
-constexpr float max_chunks = 256.0f;
+constexpr float max_chunks = 128.0f;
 };  // namespace env_definitions

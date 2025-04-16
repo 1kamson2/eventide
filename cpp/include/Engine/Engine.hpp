@@ -15,7 +15,7 @@ class Engine {
   Agent agt;
   std::vector<Chunk> chunks;
   std::vector<Chunk> chunks_to_render;
-  std::unordered_map<size_t, bool> loaded_chunks;
+  std::vector<bool> loaded_chunks;
 
   Engine();
   bool CheckIfChunkInBuffer(const size_t& idx);
