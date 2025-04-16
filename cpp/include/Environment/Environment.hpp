@@ -14,9 +14,14 @@ class Environment {
   Environment();
   void PerlinNoise();
   void WorldInit(std::vector<Chunk>& chunks_to_render);
+
+  bool Moisture(const float& x, const float& y, const float& z,
+                const float& norm, const float& f);
   float GetElevation(const float& x, const float& y, const float& z,
                      const float& f, const float& norm);
-  Color AssignColor(const float& elevation, const float& y) const;
+
+  Color AssignColor(const float& elevation, const bool& moisture,
+                    const float& y) const;
   void ChunkRender(std::vector<Chunk>& chunks_to_render, const float& f,
                    const float& norm, const int& x, const int& y, const int& z);
   void IsInAABB(const std::unique_ptr<Voxel>& cursor,

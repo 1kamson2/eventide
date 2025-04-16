@@ -28,6 +28,7 @@ constexpr float LENGTH = 1.0f;
 namespace chunk_definitions {
 using ChunkNode = std::shared_ptr<Chunk>;
 constexpr float SIZE = 16.0f;
+
 }  // namespace chunk_definitions
 
 namespace cam_definitions {
@@ -37,7 +38,7 @@ constexpr float DEFAULT_FOV = 60.0f;
 constexpr float DEFAULT_PROJ = CAMERA_PERSPECTIVE;
 constexpr int DEFAULT_MODE = CAMERA_FIRST_PERSON;
 // Value in chunks, it must be multiplied by SIZE of the chunk
-constexpr float DEFAULT_RENDER_DISTANCE = 4 * chunk_definitions::SIZE;
+constexpr float DEFAULT_RENDER_DISTANCE = 2 * chunk_definitions::SIZE;
 }  // namespace cam_definitions
 
 namespace env_definitions {

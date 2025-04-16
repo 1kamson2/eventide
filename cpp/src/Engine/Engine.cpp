@@ -9,7 +9,7 @@ using namespace cam_definitions;
 using namespace chunk_definitions;
 using namespace env_definitions;
 Engine::Engine()
-    : env(), ren(), agt((Vector3){0, 2, 4}), loaded_chunks(max_chunks, false) {
+    : env(), ren(), agt((Vector3){0, 16, 4}), loaded_chunks(max_chunks, false) {
   std::cout << "[INFO] Loading chunks." << std::endl;
   env.WorldInit(chunks);
 }

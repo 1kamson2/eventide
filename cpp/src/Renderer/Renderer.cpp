@@ -17,7 +17,7 @@ void Renderer::RenderVoxels(std::shared_ptr<Voxel>& voxel) {
   }
   Vector3 pos = voxel->GetPosition();
 
-  if (!voxel->IsBlank() && voxel->GetPosition().y == 0) {
+  if (!voxel->IsBlank() && voxel->GetPosition().y < 100) {
     DrawCube(voxel->GetPosition(), 1.0f, 1.0f, 1.0f, voxel->color);
   }
 

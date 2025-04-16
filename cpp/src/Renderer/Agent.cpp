@@ -72,6 +72,6 @@ void Agent::AgentUpdate(Action state) {
   cam.up = (Vector3){this->yaw, this->pitch, this->roll};
   UpdateCameraPro(&this->cam, (Vector3){dt_x, dt_y, 0.0f},
                   (Vector3){dt_vert, dt_horiz, 0.0f},
-                  GetMouseWheelMove() * 0.0f);
+                  GetMouseWheelMove() * 2.0f);
   // this->cursor->data.position = this->cam.target;
 }
