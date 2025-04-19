@@ -8,10 +8,11 @@
 #include "Renderer/Agent.hpp"
 #include "Renderer/Renderer.hpp"
 using namespace environment;
+using namespace chunk;
 using namespace agent;
+using namespace renderer;
 class Engine {
  public:
-  static constexpr int width = 640, height = 480;
   Environment env;
   Renderer ren;
   Agent agt;

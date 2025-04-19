@@ -5,14 +5,18 @@
 
 #include "Chunk/Chunk.hpp"
 #include "Environment/Environment.hpp"
+#include "Renderer/Agent.hpp"
 
 using namespace agent;
 using namespace chunk;
 using namespace environment;
+using namespace renderer;
 Engine::Engine()
     : env(),
-      ren(),
-      agt((Vector3){0, 16, 4}),
+      agt((Vector3){0, 16, 0}, DEFAULT_LOOK_AT, DEFAULT_UP,
+          (Vector3){0.0f, 1.0f, 0.0f},
+          Vector3CrossProduct(DEFAULT_LOOK_AT, DEFAULT_UP)),
+      ren(agt),
       loaded_chunks(MAX_CHUNKS_ALLOWED, false) {
   std::cout << "[INFO] Loading chunks." << std::endl;
   env.WorldInit(chunks);
@@ -20,26 +24,21 @@ Engine::Engine()
 
 void Engine::ProcessInput(const float& dt) {
   if (IsKeyDown(KEY_P)) {
-    agt.StateUpdate(AgentAction::PROJECTION);
+    agt.FetchState(AgentMovement::PROJECT, dt);
   }
   if (IsKeyDown(KEY_W)) {
-    agt.StateUpdate(AgentAction::MOVE_X_NORTH);
+    agt.FetchState(AgentMovement::FORWARD, dt);
   }
   if (IsKeyDown(KEY_S)) {
-    agt.StateUpdate(AgentAction::MOVE_X_SOUTH);
+    agt.FetchState(AgentMovement::BACKWARD, dt);
   }
   if (IsKeyDown(KEY_A)) {
-    agt.StateUpdate(AgentAction::MOVE_X_EAST);
+    agt.FetchState(AgentMovement::RIGHT, dt);
   }
   if (IsKeyDown(KEY_D)) {
-    agt.StateUpdate(AgentAction::MOVE_X_WEST);
-  }
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    AgentAction act = AgentAction::TRY_TO_CREATE;
-  } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-    AgentAction act = AgentAction::TRY_TO_CREATE;
+    agt.FetchState(AgentMovement::LEFT, dt);
   } else {
-    agt.StateUpdate(AgentAction::IDLE);
+    agt.FetchState(AgentMovement::IDLE, dt);
   }
 }
 
@@ -50,7 +49,7 @@ bool Engine::CheckIfChunkInBuffer(const size_t& idx) {
 // bool Engine::PeekAtNextChunk(const Chunk& chunk) {}
 
 void Engine::GetChunksToRender() {
-  Vector3 agent_pos = agt.GetPosition();
+  Vector3 position = agt.GetPosition();
   // voxels_to_render.clear();
   float max_y = 3.0f;
   /* The chunks are stored in the following manner:
@@ -69,7 +68,7 @@ void Engine::GetChunksToRender() {
       PREV_STATE = loaded_chunks[idx];
     }
 
-    if (chunks[idx].InView(agent_pos, DEFAULT_DISTANCE)) {
+    if (chunks[idx].InView(position, DEFAULT_DISTANCE)) {
       /* The chunk possibly not seen */
       loaded_chunks[idx] = true;
     } else {

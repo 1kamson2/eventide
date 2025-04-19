@@ -8,7 +8,7 @@ int main() {
   Engine run{};
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetConfigFlags(FLAG_MSAA_4X_HINT);
-  InitWindow(run.width, run.height, "Test");
+  InitWindow(WIDTH, HEIGHT, "Test");
   SetTargetFPS(1 << 31);
   DisableCursor();
   float delta;

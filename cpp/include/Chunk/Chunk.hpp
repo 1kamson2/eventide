@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Voxel/Voxel.hpp"
-
 using namespace voxel;
 namespace chunk {
 constexpr float SIZE = 16.0f;

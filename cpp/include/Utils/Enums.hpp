@@ -1,13 +1,10 @@
 #pragma once
 
-enum class AgentAction {
-  MOVE_X_NORTH = 0,
-  MOVE_X_SOUTH = 1,
-  MOVE_X_EAST = 2,
-  MOVE_X_WEST = 3,
-  ROLL = 4,
-  PROJECTION = 5,
+enum class AgentMovement {
+  FORWARD = 0,
+  BACKWARD = 1,
+  RIGHT = 2,
+  LEFT = 3,
+  PROJECT = 5,
   IDLE = 6,
-  TRY_TO_DESTROY = 100,
-  TRY_TO_CREATE = 101,
 };
