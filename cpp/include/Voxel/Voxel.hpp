@@ -5,7 +5,10 @@
 #include <memory>
 
 namespace voxel {
+class Voxel;
 
+using VoxelRef = std::shared_ptr<Voxel>&;
+using VoxelCRef = const std::shared_ptr<Voxel>&;
 constexpr float LENGTH = 1.0f;
 
 class Voxel {

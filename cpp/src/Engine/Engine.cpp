@@ -17,7 +17,7 @@ Engine::Engine()
           (Vector3){0.0f, 1.0f, 0.0f},
           Vector3CrossProduct(DEFAULT_LOOK_AT, DEFAULT_UP)),
       ren(agt),
-      loaded_chunks(MAX_CHUNKS_ALLOWED, false) {
+      loaded_chunks_position_buf(MAX_CHUNKS_ALLOWED, -1) {
   std::cout << "[INFO] Loading chunks." << std::endl;
   env.WorldInit(chunks);
 }
@@ -43,56 +43,65 @@ void Engine::ProcessInput(const float& dt) {
 }
 
 bool Engine::CheckIfChunkInBuffer(const size_t& idx) {
-  return loaded_chunks[idx];
+  return loaded_chunks_position_buf[idx] != -1;
 }
 
 // bool Engine::PeekAtNextChunk(const Chunk& chunk) {}
 
 void Engine::GetChunksToRender() {
-  Vector3 position = agt.GetPosition();
-  // voxels_to_render.clear();
-  float max_y = 3.0f;
-  /* The chunks are stored in the following manner:
-   * Chunk 0:
-   * [0, SIZE * SIZE * max_y - 1],
-   * Chunk 1:
-   * [SIZE * SIZE * max_y, ... -1]
+  /*
+   * Parameters:
+   *  None
+   * Function:
+   *  Loads and unloads chunks from the render buffer.
    */
-
-  for (size_t idx = 0; idx < chunks.size(); ++idx) {
-    bool PREV_STATE = false;
+  Vector3 position = agt.GetPosition();
+  for (size_t idx = 0; idx < MAX_CHUNKS_ALLOWED; ++idx) {
+    /* We always assume, that the chunk on idx is not seen */
+    size_t pos_in_loaded_buffer = -1;
+    bool SHOULD_BE_UNLOADED = false;
+    bool SHOULD_BE_PUSHED = false;
 
     if (CheckIfChunkInBuffer(idx)) {
-      /* If in buffer fetch the state, if not then the PREV_STATE = false is
-       * still a valid value */
-      PREV_STATE = loaded_chunks[idx];
+      /* We check if the chunk has been previously loaded and is still in the
+       * buffer */
+      pos_in_loaded_buffer = loaded_chunks_position_buf[idx];
     }
 
     if (chunks[idx].InView(position, DEFAULT_DISTANCE)) {
-      /* The chunk possibly not seen */
-      loaded_chunks[idx] = true;
+      /* The chunk is in view, but might be not in the chunk render buffer */
+      if (pos_in_loaded_buffer == -1) {
+        /* The chunk wasn't in render buffer, so we load it */
+        loaded_chunks_position_buf[idx] = ++chunks_to_render_last_pos;
+        pos_in_loaded_buffer = loaded_chunks_position_buf[idx];
+        SHOULD_BE_PUSHED = true;
+      }
     } else {
-      /* The chunk possibly seen */
-      loaded_chunks[idx] = false;
+      /* The chunk should be unloaded */
+      /* Keep pos_in_loaded_buffer as reference to unload */
+      if (pos_in_loaded_buffer != -1) {
+        loaded_chunks_position_buf[idx] = -1;
+        SHOULD_BE_UNLOADED = true;
+      }
     }
 
-    if ((PREV_STATE == false) && (loaded_chunks[idx] == true)) {
-      /* Should load */
-      std::cout << "[INFO] Loaded the chunk: " << idx << std::endl;
-      chunks_to_render.push_back(chunks[idx]);
-    } else if ((PREV_STATE == true) && (loaded_chunks[idx] == false)) {
-      /* Should unload */
-      if (chunks_to_render.size() == 0) {
-        break;
+    if (SHOULD_BE_UNLOADED) {
+      std::cout << "[INFO] Unloaded the chunk: " << idx << std::endl;
+      if (chunks_to_render.size() > 0) {
+        chunks_to_render.erase(chunks_to_render.begin() + pos_in_loaded_buffer);
+        --chunks_to_render_last_pos;
       }
-      for (auto it = chunks_to_render.begin(); it != chunks_to_render.end();
-           ++it) {
-        if (it->TheSameChunk(chunks[idx])) {
-          chunks_to_render.erase(it);
-          std::cout << "[INFO] Unloaded the chunk: " << idx << std::endl;
-          break;
+      if (pos_in_loaded_buffer + 1 < MAX_CHUNKS_ALLOWED) {
+        for (int idx = pos_in_loaded_buffer + 1; idx < MAX_CHUNKS_ALLOWED;
+             ++idx) {
+          if (loaded_chunks_position_buf[idx] != -1) {
+            loaded_chunks_position_buf[idx] -= 1;
+          }
         }
       }
+    }
+    if (SHOULD_BE_PUSHED) {
+      chunks_to_render.push_back(chunks[idx]);
     }
   }
 }

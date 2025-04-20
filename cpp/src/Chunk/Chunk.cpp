@@ -8,13 +8,12 @@ Chunk::Chunk(const Vector3& mid_point) : mid_point(mid_point) {
   std::cout << "[INFO] Chunk was created" << std::endl;
 }
 
-void Chunk::Update(std::shared_ptr<Voxel>& voxel) {
+void Chunk::Update(VoxelRef voxel) {
   root_voxel = Insert(root_voxel, voxel, 0);
 }
 
-std::shared_ptr<Voxel> Chunk::Insert(std::shared_ptr<Voxel>& last_free_voxel,
-                                     std::shared_ptr<Voxel>& new_voxel,
-                                     int depth) {
+std::shared_ptr<Voxel> Chunk::Insert(VoxelRef last_free_voxel,
+                                     VoxelRef new_voxel, int depth) {
   if (!last_free_voxel) {
     /* Free node has been found */
     return new_voxel;
@@ -80,8 +79,7 @@ float Chunk::GetDistanceSquared(Vector3& vec1, Vector3& vec2) {
   return x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
 }
 
-float Chunk::GetDistanceSquared(const std::shared_ptr<Voxel>& vox1,
-                                const std::shared_ptr<Voxel>& vox2) {
+float Chunk::GetDistanceSquared(VoxelCRef vox1, VoxelCRef vox2) {
   Vector3 vox1_pos = vox1->GetPosition();
   Vector3 vox2_pos = vox2->GetPosition();
   float x_dist = vox1_pos.x - vox2_pos.x;
@@ -90,19 +88,17 @@ float Chunk::GetDistanceSquared(const std::shared_ptr<Voxel>& vox1,
   return x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
 }
 
-bool operator==(const Voxel& lhs, const Voxel& rhs) {
-  Vector3 lhs_pos = lhs.GetPosition();
-  Vector3 rhs_pos = rhs.GetPosition();
+bool operator==(VoxelCRef lhs, VoxelCRef rhs) {
+  Vector3 lhs_pos = lhs->GetPosition();
+  Vector3 rhs_pos = rhs->GetPosition();
   return lhs_pos.x == rhs_pos.x && lhs_pos.y == rhs_pos.y &&
          lhs_pos.z == rhs_pos.z;
 }
-void Chunk::LoadVoxelsLTY(float& max_y, std::shared_ptr<Voxel>& curr_voxel) {
-  // TODO: We shouldn't clear all buffer and then load again.
+void Chunk::LoadVoxelsLTY(float& max_y, VoxelRef curr_voxel) {
   if (curr_voxel == nullptr) {
     return;
   }
 
-  // TODO: Should be able to exit faster
   if (curr_voxel->GetPosition().y >= -max_y) {
     Update(curr_voxel);
   }
@@ -111,7 +107,7 @@ void Chunk::LoadVoxelsLTY(float& max_y, std::shared_ptr<Voxel>& curr_voxel) {
   LoadVoxelsLTY(max_y, curr_voxel->right);
 }
 
-bool Chunk::IsVoxelInChunk(const std::shared_ptr<Voxel>& voxel) {
+bool Chunk::IsVoxelInChunk(VoxelCRef voxel) {
   Vector3 vox_pos = voxel->GetPosition();
   Vector3 chunk_mid = GetMidPoint();
 

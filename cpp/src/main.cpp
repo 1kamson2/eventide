@@ -6,15 +6,14 @@
 
 int main() {
   Engine run{};
+  float delta{0};
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(WIDTH, HEIGHT, "Test");
   SetTargetFPS(1 << 31);
   DisableCursor();
-  float delta;
   while (!WindowShouldClose()) {
     delta = GetFrameTime();
-
     BeginDrawing();
     ClearBackground(BLUE);
     BeginMode3D(run.agt.cam);

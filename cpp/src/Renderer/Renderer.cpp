@@ -24,7 +24,6 @@ void Renderer::RenderVoxels(std::shared_ptr<Voxel>& voxel) {
   if (voxel == nullptr) {
     return;
   }
-  Vector3 pos = voxel->GetPosition();
 
   if (!voxel->IsBlank()) {
     frustum.Update(agt);

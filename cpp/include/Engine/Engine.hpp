@@ -18,7 +18,8 @@ class Engine {
   Agent agt;
   std::vector<Chunk> chunks;
   std::vector<Chunk> chunks_to_render;
-  std::vector<bool> loaded_chunks;
+  size_t chunks_to_render_last_pos = 0;
+  std::vector<size_t> loaded_chunks_position_buf;
 
   Engine();
   bool CheckIfChunkInBuffer(const size_t& idx);
