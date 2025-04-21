@@ -16,7 +16,7 @@ class Voxel {
   Color color;
   Vector3 position{0.0f, 0.0f, 0.0f};
   Vector3 center{LENGTH / 2, -LENGTH / 2, LENGTH / 2};
-  Vector3 extents{LENGTH, -LENGTH, LENGTH};
+  Vector3 extents{LENGTH / 2, -LENGTH * 1.5f, LENGTH / 2};
   std::shared_ptr<Voxel> left = nullptr;
   std::shared_ptr<Voxel> right = nullptr;
 

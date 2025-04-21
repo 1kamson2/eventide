@@ -2,16 +2,19 @@
 #include <iostream>
 #include <vector>
 
+#include "Utils/Enums.hpp"
 #include "Voxel/Voxel.hpp"
 using namespace voxel;
+using namespace chunk_enums;
 namespace chunk {
 constexpr float SIZE = 16.0f;
-constexpr float DEFAULT_DISTANCE = 2 * chunk::SIZE;
+constexpr float DEFAULT_DISTANCE = 4 * chunk::SIZE;
 
 class Chunk {
  public:
   std::shared_ptr<Voxel> root_voxel = nullptr;
   Vector3 mid_point;
+  mutable bool visible = false;
 
   Chunk(const Vector3& mid_point);
   void Update(VoxelRef voxel);
@@ -20,6 +23,8 @@ class Chunk {
   float GetDistanceSquared(Vector3& vec1, Vector3& vec2);
   Vector3 GetMidPoint() const;
 
+  void MarkAs(const Visibility& status) const;
+  bool IsVisible() const;
   bool IsVoxelInChunk(VoxelCRef voxel);
   bool TheSameChunk(const Chunk& rhs);
 

@@ -14,9 +14,6 @@ using namespace biomes;
 Environment::Environment() {}
 void Environment::WorldInit(std::vector<Chunk>& chunks_to_render) {
   uint64_t voxels_currently_rendered = 0, chunks_currently_rendered = 0;
-  std::cout << Y_BOUND << std::endl;
-  std::cout << X_BOUND << std::endl;
-  std::cout << Z_BOUND << std::endl;
   for (float y = 0; y < Y_BOUND; y += SIZE) {
     for (float x = 0; x < X_BOUND; x += SIZE) {
       for (float z = 0; z < Z_BOUND; z += SIZE) {

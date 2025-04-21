@@ -60,19 +60,15 @@ void Agent::FetchState(AgentMovement state, const float& dt) {
   float velocity = movement_speed * dt;
   switch (state) {
     case AgentMovement::FORWARD:
-      position.x += velocity;
       x_dt = velocity;
       break;
     case AgentMovement::BACKWARD:
-      position.x += -velocity;
       x_dt = -velocity;
       break;
     case AgentMovement::RIGHT:
-      position.y += -velocity;
       z_dt = -velocity;
       break;
     case AgentMovement::LEFT:
-      position.y += velocity;
       z_dt = velocity;
       break;
     case AgentMovement::PROJECT:
@@ -93,19 +89,13 @@ Vector2 Agent::MouseDelta() const { return GetMouseDelta(); }
 void Agent::UpdateVectors() {
   Vector3 front_updated{-1, -1, -1};
   // TODO: put an array of this values, so we optimize it
-  front_updated.x = cos(DEG2RAD * yaw) * cos(DEG2RAD * pitch);
-  front_updated.y = sin(DEG2RAD * pitch);
-  front_updated.z = sin(DEG2RAD * yaw) * cos(DEG2RAD * pitch);
-  assert(front_updated.x != -1 || front_updated.y != -1 ||
-         front_updated.z != -1);
-
-  Normalize(front_updated);
-  front = front_updated;
-
+  front = GetCameraForward(&cam);
+  Normalize(front);
   right = Vector3CrossProduct(world_up, front);
   Normalize(right);
   up = Vector3CrossProduct(front, right);
   Normalize(up);
+  position = cam.position;
 }
 
 void Agent::Update(const float& x_dt, const float& z_dt, const float& dt) {
@@ -135,9 +125,9 @@ void Agent::Update(const float& x_dt, const float& z_dt, const float& dt) {
     pitch = -89.0f;
   }
   // pitch = pitch < 1.0f ? pitch + mouse_y : 89.0f;
-  UpdateVectors();
   // cam.up = up;
   // cam.target = position + front;
+  UpdateVectors();
   UpdateCameraPro(&this->cam, (Vector3){x_dt, z_dt, 0},
                   (Vector3){mouse_x, mouse_y, 0},
                   GetMouseWheelMove() * mouse_sens);

@@ -9,7 +9,7 @@
 
 #include "Utils/Enums.hpp"
 #include "Utils/VecOperations.hpp"
-
+using namespace agent_enums;
 namespace agent {
 constexpr float YAW = 0.0f;
 constexpr float PITCH = 1.0f;

@@ -3,10 +3,11 @@
 #include <cmath>
 #include <cstddef>
 
+#include "Utils/Enums.hpp"
+
 using namespace chunk;
-Chunk::Chunk(const Vector3& mid_point) : mid_point(mid_point) {
-  std::cout << "[INFO] Chunk was created" << std::endl;
-}
+using namespace chunk_enums;
+Chunk::Chunk(const Vector3& mid_point) : mid_point(mid_point) {}
 
 void Chunk::Update(VoxelRef voxel) {
   root_voxel = Insert(root_voxel, voxel, 0);
@@ -43,35 +44,11 @@ bool Chunk::InView(Vector3& vec_pos, const float& max_allowed_dist) {
    *   Check if the voxel is in agent's view.
    */
   Vector3 self_midpoint = GetMidPoint();
-  if (!InAxisView(vec_pos.x, self_midpoint.x, max_allowed_dist)) {
-    return false;
-  }
-  if (!InAxisView(vec_pos.y, self_midpoint.y, max_allowed_dist)) {
-    return false;
-  }
-  if (!InAxisView(vec_pos.z, self_midpoint.z, max_allowed_dist)) {
-    return false;
-  }
 
   float dist = GetDistanceSquared(vec_pos, self_midpoint);
   return dist < (max_allowed_dist + LENGTH) * (max_allowed_dist + LENGTH);
 }
 
-bool Chunk::InAxisView(const float& first_scalar_point_value,
-                       const float& second_scalar_point_value,
-                       const float& max_allowed_dist) const {
-  /*
-   * Parameters:
-   *  first_scalar_point_value: The value of point on given axis.
-   *  second_scalar_point_value: The value of point on given axis.
-   *  max_allowed_dist: The maximum distance allowed.
-   * Function:
-   *  Check if the distance in straight line doesn't exceed the max_allowed_dist
-   *
-   * */
-  return fabs(first_scalar_point_value - second_scalar_point_value) <=
-         max_allowed_dist + LENGTH;
-}
 float Chunk::GetDistanceSquared(Vector3& vec1, Vector3& vec2) {
   float x_dist = vec1.x - vec2.x;
   float y_dist = vec1.y - vec2.y;
@@ -106,6 +83,19 @@ void Chunk::LoadVoxelsLTY(float& max_y, VoxelRef curr_voxel) {
   LoadVoxelsLTY(max_y, curr_voxel->left);
   LoadVoxelsLTY(max_y, curr_voxel->right);
 }
+
+void Chunk::MarkAs(const Visibility& status) const {
+  switch (status) {
+    case Visibility::VISIBLE:
+      visible = true;
+      break;
+    case Visibility::INVISIBLE:
+      visible = false;
+      break;
+  }
+}
+
+bool Chunk::IsVisible() const { return visible; }
 
 bool Chunk::IsVoxelInChunk(VoxelCRef voxel) {
   Vector3 vox_pos = voxel->GetPosition();

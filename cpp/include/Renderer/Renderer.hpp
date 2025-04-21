@@ -1,5 +1,7 @@
 #pragma once
 
+#include <raylib.h>
+
 #include <cmath>
 #include <memory>
 #include <vector>
@@ -14,17 +16,19 @@ using namespace chunk;
 using namespace vec_operations;
 using namespace agent;
 namespace renderer {
-constexpr float Z_FAR = 5.0f;
-constexpr float Z_NEAR = 3.0f;
-const float HALF_VERT_SIDE = Z_FAR * tanf(DEFAULT_FOV * 0.5f);
+/* distance on the z-axis from camera to the furthest plane */
+constexpr float Z_FAR = 3 * SIZE;
+/* distance on the z-axis from camera to the nearest plane */
+constexpr float Z_NEAR = 1 * SIZE;
+const float HALF_VERT_SIDE = Z_FAR * tanf((DEG2RAD * DEFAULT_FOV) * 0.5f);
 const float HALF_HORIZ_SIDE = HALF_VERT_SIDE * ASPECT;
 
 struct Plane {
   Vector3 normal{0.0f, 1.0f, 0.0f};
   float dist = 0.0f;
   Plane();
-  bool IsOnPlane(const std::shared_ptr<Voxel>& voxel) const;
   Plane(Vector3 normal, Vector3 dist_vec);
+  bool IsOnPlane(const std::shared_ptr<Voxel>& voxel) const;
   float GetDistanceToPoint(const Vector3& point) const;
 };
 
@@ -54,6 +58,8 @@ class Renderer {
 
   bool InFrustum(const Frustum& cfrustum, std::shared_ptr<Voxel> voxel) const;
   void TraverseChunks(std::vector<Chunk>& chunks_to_render);
-  void RenderVoxels(std::shared_ptr<Voxel>& voxel);
+  void RenderVoxels(std::shared_ptr<Voxel>& voxel, size_t& index);
+  void RenderAgent();
+  void RenderFrustum();
 };
 };  // namespace renderer

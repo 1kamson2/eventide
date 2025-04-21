@@ -7,19 +7,20 @@
 #include "Environment/Environment.hpp"
 #include "Renderer/Agent.hpp"
 #include "Renderer/Renderer.hpp"
+
 using namespace environment;
 using namespace chunk;
 using namespace agent;
 using namespace renderer;
 class Engine {
+ private:
+  bool debugging = true;
+
  public:
   Environment env;
   Renderer ren;
   Agent agt;
   std::vector<Chunk> chunks;
-  std::vector<Chunk> chunks_to_render;
-  size_t chunks_to_render_last_pos = 0;
-  std::vector<size_t> loaded_chunks_position_buf;
 
   Engine();
   bool CheckIfChunkInBuffer(const size_t& idx);
