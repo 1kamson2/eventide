@@ -8,7 +8,7 @@ using namespace voxel;
 using namespace chunk_enums;
 namespace chunk {
 constexpr float SIZE = 16.0f;
-constexpr float DEFAULT_DISTANCE = 4 * chunk::SIZE;
+constexpr float DEFAULT_DISTANCE = 2 * chunk::SIZE;
 
 class Chunk {
  public:
